@@ -1,0 +1,45 @@
+/docs/SPECS.md
+/docs/ROADMAP.md
+.env
+AGENTS.md
+opencode.jsonc
+
+# --- secrets & local env (all apps) ---
+.env.*
+!.env.example
+*.key
+*.pem
+auth.json
+*.sqlite
+*.sqlite-*
+
+# --- heavy / generated (monorepo-wide safety net) ---
+**/vendor/
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/dist/
+**/coverage/
+*.tsbuildinfo
+.phpunit.cache/
+.phpunit.result.cache
+
+# --- logs & caches ---
+*.log
+**/storage/logs/*
+**/.cache/
+
+# --- OS / IDE / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.fleet/
+*.swp
+*.swo
+*~
+
+# --- test artifacts (future Playwright) ---
+/test-results/
+/playwright-report/
