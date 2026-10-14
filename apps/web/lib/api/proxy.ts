@@ -32,6 +32,39 @@ export function forbiddenResponse() {
   );
 }
 
+/** Upper bound for auth JSON bodies (login/register/OAuth exchange). */
+export const MAX_AUTH_BODY_BYTES = 32 * 1024;
+
+/** Upper bound for a single opaque token string. */
+export const MAX_TOKEN_CHARS = 8 * 1024;
+
+/**
+ * Fast pre-parse guard: reject an obviously oversized body before
+ * buffering it. Chunked requests carry no Content-Length, so callers
+ * must also cap the parsed payload (see isPayloadTooLarge).
+ */
+export function isBodyTooLarge(req: NextRequest, maxBytes: number): boolean {
+  const length = Number(req.headers.get("content-length") ?? "0");
+  return Number.isFinite(length) && length > maxBytes;
+}
+
+/** Post-parse guard for chunked bodies: cap the reserialized size. */
+export function isPayloadTooLarge(payload: unknown, maxBytes: number): boolean {
+  try {
+    const serialized = JSON.stringify(payload);
+    return typeof serialized === "string" ? serialized.length > maxBytes : true;
+  } catch {
+    return true;
+  }
+}
+
+export function bodyTooLargeResponse() {
+  return NextResponse.json(
+    { error: { code: "PAYLOAD_TOO_LARGE", message: copy.common.requestTooLarge } },
+    { status: 413 }
+  );
+}
+
 export function unreachableResponse() {
   return NextResponse.json(
     { error: { code: "UPSTREAM_UNREACHABLE", message: copy.common.failedConnection } },

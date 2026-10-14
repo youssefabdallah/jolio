@@ -8,4 +8,15 @@ export { default as MenuIcon } from "./MenuIcon";
 export { default as SearchIcon } from "./SearchIcon";
 export { default as SettingsIcon } from "./SettingsIcon";
 export { default as UserIcon } from "./UserIcon";
+export {
+  ArchiveIcon,
+  ArticleIcon,
+  BellIcon,
+  CheckCircleIcon,
+  ChevronDownIcon,
+  HelpIcon,
+  RefreshIcon,
+  TerminalIcon,
+  TuneIcon,
+} from "./status";
 export type { IconProps } from "./types";

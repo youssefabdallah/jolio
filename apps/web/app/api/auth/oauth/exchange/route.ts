@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isSameOrigin, forbiddenResponse, unreachableResponse, setTokenCookie } from "@/lib/api/proxy";
+import { isBodyTooLarge, bodyTooLargeResponse, isPayloadTooLarge, isSameOrigin, forbiddenResponse, unreachableResponse, setTokenCookie, MAX_AUTH_BODY_BYTES, MAX_TOKEN_CHARS } from "@/lib/api/proxy";
 import { readJsonBody, upstreamFetch } from "@/lib/api/server";
 import { parseSessionUser } from "@/lib/auth/user";
 import { copy } from "@/copy";
@@ -16,9 +16,16 @@ export async function POST(req: NextRequest) {
     return forbiddenResponse();
   }
 
-  const payload: { token?: unknown } = await req.json().catch(() => ({}));
+  if (isBodyTooLarge(req, MAX_AUTH_BODY_BYTES)) {
+    return bodyTooLargeResponse();
+  }
 
-  if (typeof payload.token !== "string" || payload.token === "") {
+  const payload: { token?: unknown } = await req.json().catch(() => ({}));
+  if (isPayloadTooLarge(payload, MAX_AUTH_BODY_BYTES)) {
+    return bodyTooLargeResponse();
+  }
+
+  if (typeof payload.token !== "string" || payload.token === "" || payload.token.length > MAX_TOKEN_CHARS) {
     return NextResponse.json(
       { error: { code: "INVALID_TOKEN", message: copy.auth.oauthInvalid } },
       { status: 400 }

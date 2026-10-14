@@ -1,5 +1,5 @@
 import type { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE } from "./config";
+import { isProduction, SESSION_COOKIE } from "./config";
 
 /**
  * Single owner of the session cookie's attributes.
@@ -32,11 +32,11 @@ interface SessionCookieAttributes {
 
 export function sessionCookieAttributes(req: NextRequest): SessionCookieAttributes {
   const forwardedProto = req.headers.get("x-forwarded-proto");
-  // Secure follows the scheme the browser actually used. Behind a
-  // TLS-terminating proxy that scheme arrives via x-forwarded-proto;
-  // for direct https access the URL protocol covers it. Plain local
-  // HTTP therefore keeps working while production (https) is protected.
-  const secure = forwardedProto === "https" || req.nextUrl.protocol === "https:";
+  // Production always sets Secure: the header above is client-controlled
+  // and must not be able to downgrade a production cookie to plaintext.
+  // Plain local HTTP keeps working because isProduction() is false there.
+  const secure =
+    isProduction() || forwardedProto === "https" || req.nextUrl.protocol === "https:";
   return {
     httpOnly: true,
     secure,

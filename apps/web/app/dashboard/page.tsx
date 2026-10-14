@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { me } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
 import type { RegisteredUser } from "@/lib/api/auth";
 import { copy } from "@/copy";
 import { DashboardScreen } from "@/features/auth";
@@ -10,7 +11,8 @@ import { DashboardScreen } from "@/features/auth";
 /**
  * Dashboard shell: resolves the session client-side and renders the
  * minimalist workspace. The proxy already verified the session before
- * this page is served; a 401 here (revoked since) bounces to login.
+ * this page is served; a 401 here (revoked since) bounces to login,
+ * while outages go to the unavailable notice with the cookie kept.
  */
 export default function DashboardPage() {
   const router = useRouter();
@@ -30,9 +32,16 @@ export default function DashboardPage() {
             router.replace("/");
           }
         }
-      } catch {
+      } catch (thrown) {
+        // 401 means the session died since the proxy check: bounce to
+        // sign-in. Anything else (502 outage, 429, network timeout) keeps
+        // the cookie and shows the outage notice instead of signing out.
         if (!cancelled) {
-          router.replace("/");
+          if (thrown instanceof ApiError && thrown.status === 401) {
+            router.replace("/");
+          } else {
+            router.replace("/unavailable");
+          }
         }
       } finally {
         if (!cancelled) {

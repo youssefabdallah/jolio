@@ -56,6 +56,7 @@ export const copy = {
     failedConnection: "Could not reach the server. Check your connection and try again.",
     unexpectedError: "Something went wrong. Please try again.",
     forbidden: "This request was refused.",
+    requestTooLarge: "This request was too large. Try again with smaller input.",
     unavailableTitle: "Service temporarily unavailable",
     unavailableBody:
       "We could not verify your session because the server is unreachable. Your sign-in was left untouched.",

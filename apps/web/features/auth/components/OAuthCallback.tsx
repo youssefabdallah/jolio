@@ -20,8 +20,16 @@ export default function OAuthCallback() {
   useEffect(() => {
     let cancelled = false;
 
+    /** Remove the fragment so the token never lingers in history. */
+    function clearFragment(): void {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+
     async function completeHandshake(): Promise<void> {
       const params = new URLSearchParams(window.location.hash.slice(1));
+      // Wipe the fragment immediately after reading: history entries,
+      // shoulder-surfers, and extensions must not retain the token.
+      clearFragment();
 
       const failed = params.get("error");
       if (failed) {
