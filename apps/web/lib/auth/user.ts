@@ -1,10 +1,11 @@
 import type { RegisteredUser } from "../api/auth";
 
 /**
- * Runtime validation for the Laravel session user.
+ * Runtime validation for the Laravel session user (GET /api/user serves
+ * the public UserResource schema: id, display name, email, provider,
+ * avatar — never the raw model).
  *
- * TypeScript types vanish at runtime, so the JSON body of GET /api/user
- * (currently the raw Eloquent model, NOT UserResource) is parsed as
+ * TypeScript types vanish at runtime, so the JSON body is parsed as
  * `unknown` and checked field by field. Only the five fields the UI
  * needs are returned — extra backend attributes (timestamps,
  * provider_id, …) are dropped so components cannot depend on or leak
@@ -14,6 +15,24 @@ import type { RegisteredUser } from "../api/auth";
  */
 
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Provider avatars are remote images: http(s) only, bounded length. */
+const MAX_AVATAR_URL_CHARS = 2048;
+
+function isSafeAvatarUrl(value: unknown): value is string | null {
+  if (value === null) {
+    return true;
+  }
+  if (typeof value !== "string" || value === "" || value.length > MAX_AVATAR_URL_CHARS) {
+    return false;
+  }
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -42,7 +61,7 @@ export function parseSessionUser(input: unknown): RegisteredUser | null {
   if (!nonEmptyString(provider)) {
     return null;
   }
-  if (avatar_url !== null && typeof avatar_url !== "string") {
+  if (!isSafeAvatarUrl(avatar_url)) {
     return null;
   }
 

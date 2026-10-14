@@ -64,7 +64,18 @@ export default function AvatarMenu({ user }: { user: RegisteredUser }) {
         onClick={() => setOpen((v) => !v)}
       >
         <span className="dash-avatar-btn" aria-hidden="true">
-          {user.display_name.slice(0, 1).toUpperCase()}
+          {user.avatar_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- remote provider URL unknown at build time; next/image optimization is not worth remotePatterns + external fetch for a 36px glyph */
+            <img
+              src={user.avatar_url}
+              alt=""
+              referrerPolicy="no-referrer"
+              draggable={false}
+              className="dash-avatar-img"
+            />
+          ) : (
+            user.display_name.slice(0, 1).toUpperCase()
+          )}
         </span>
         <span className="dash-avatar-name truncate">{user.display_name}</span>
         <ChevronDownIcon size={16} className="shrink-0 text-muted" />

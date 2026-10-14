@@ -23,11 +23,20 @@ describe("parseSessionUser", () => {
     expect(parsed).not.toHaveProperty("provider_id");
   });
 
-  it("accepts a string avatar_url", () => {
+  it("accepts a provider avatar over https", () => {
     expect(parseSessionUser({ ...VALID, avatar_url: "https://example.com/a.png" })).toEqual({
       ...VALID,
       avatar_url: "https://example.com/a.png",
     });
+  });
+
+  it.each([
+    ["javascript: scheme", "javascript:alert(1)"],
+    ["data: scheme", "data:image/svg+xml,<svg></svg>"],
+    ["relative path", "/avatars/a.png"],
+    ["oversized value", `https://example.com/${"a".repeat(2048)}`],
+  ])("rejects an avatar_url with %s", (_label, avatar_url) => {
+    expect(parseSessionUser({ ...VALID, avatar_url })).toBeNull();
   });
 
   it.each([

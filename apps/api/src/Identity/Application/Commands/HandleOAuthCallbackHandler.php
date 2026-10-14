@@ -56,6 +56,20 @@ final readonly class HandleOAuthCallbackHandler
             );
 
             $this->users->save($user);
+        } else {
+            // Returning user: re-assert the provider-vouched profile so a
+            // changed avatar or display name at the provider shows up here.
+            // A missing avatar in this handshake keeps the stored one.
+            $displayName = trim($account->displayName) === '' ? $user->displayName : $account->displayName;
+            $refreshed = $user->refreshOAuthProfile(
+                $displayName,
+                $account->avatarUrl ?? $user->avatarUrl,
+            );
+
+            if ($refreshed->displayName !== $user->displayName || $refreshed->avatarUrl !== $user->avatarUrl) {
+                $this->users->save($refreshed);
+                $user = $refreshed;
+            }
         }
 
         return new AuthenticatedUser($user, $this->tokens->issueFor($user->id, $command->deviceName));

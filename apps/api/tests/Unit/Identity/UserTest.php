@@ -58,6 +58,57 @@ final class UserTest extends TestCase
         User::registerLocal(Ulid::generate(), Email::fromString('a@b.co'), '  ', 'hash');
     }
 
+    public function test_refreshes_the_oauth_profile_on_returning_sign_in(): void
+    {
+        $user = User::registerOAuth(
+            Ulid::generate(),
+            Email::fromString('alex@gmail.com'),
+            'Alex Dev',
+            AuthProvider::Google,
+            'google-123',
+            'https://avatars.example/old.png',
+        );
+
+        $refreshed = $user->refreshOAuthProfile('Alex Dev II', 'https://avatars.example/new.png');
+
+        $this->assertSame((string) $user->id, (string) $refreshed->id);
+        $this->assertSame('alex@gmail.com', (string) $refreshed->email);
+        $this->assertSame(AuthProvider::Google, $refreshed->provider);
+        $this->assertSame('google-123', $refreshed->providerId);
+        $this->assertNull($refreshed->passwordHash);
+        $this->assertSame('Alex Dev II', $refreshed->displayName);
+        $this->assertSame('https://avatars.example/new.png', $refreshed->avatarUrl);
+    }
+
+    public function test_rejects_refreshing_a_local_user_from_a_provider(): void
+    {
+        $user = User::registerLocal(
+            Ulid::generate(),
+            Email::fromString('alex@dev.internal'),
+            'Alex Dev',
+            'hashed-secret',
+        );
+
+        $this->expectException(InvalidUser::class);
+
+        $user->refreshOAuthProfile('Alex Dev', null);
+    }
+
+    public function test_rejects_refreshing_with_a_blank_display_name(): void
+    {
+        $user = User::registerOAuth(
+            Ulid::generate(),
+            Email::fromString('alex@gmail.com'),
+            'Alex Dev',
+            AuthProvider::Google,
+            'google-123',
+        );
+
+        $this->expectException(InvalidUser::class);
+
+        $user->refreshOAuthProfile('  ', null);
+    }
+
     public function test_rejects_oauth_with_the_local_provider(): void
     {
         $this->expectException(InvalidUser::class);

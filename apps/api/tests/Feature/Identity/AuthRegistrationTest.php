@@ -145,6 +145,86 @@ final class AuthRegistrationTest extends TestCase
         $this->assertSame(1, User::query()->where('email', 'alex@gmail.com')->count());
     }
 
+    public function test_stores_the_provider_avatar_on_first_oauth_sign_in(): void
+    {
+        config()->set('services.google', [
+            'client_id' => 'test-client-id',
+            'client_secret' => 'test-client-secret',
+            'redirect' => 'http://localhost:8000/api/v1/auth/google/callback',
+        ]);
+        $this->mockSocialiteUser('google-123', 'alex@gmail.com', 'Alex Dev', 'https://avatars.example/a.png');
+
+        $this->getJson('/api/v1/auth/google/callback?code=auth-code')->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'alex@gmail.com',
+            'avatar_url' => 'https://avatars.example/a.png',
+        ]);
+    }
+
+    public function test_refreshes_the_avatar_on_returning_oauth_sign_in(): void
+    {
+        config()->set('services.google', [
+            'client_id' => 'test-client-id',
+            'client_secret' => 'test-client-secret',
+            'redirect' => 'http://localhost:8000/api/v1/auth/google/callback',
+        ]);
+        User::factory()->oauth()->create([
+            'email' => 'alex@gmail.com',
+            'provider_id' => 'google-123',
+            'avatar_url' => 'https://avatars.example/old.png',
+        ]);
+        $this->mockSocialiteUser('google-123', 'alex@gmail.com', 'Alex Dev II', 'https://avatars.example/new.png');
+
+        $this->getJson('/api/v1/auth/google/callback?code=auth-code')->assertRedirect();
+
+        $this->assertSame(1, User::query()->where('email', 'alex@gmail.com')->count());
+        $this->assertDatabaseHas('users', [
+            'email' => 'alex@gmail.com',
+            'display_name' => 'Alex Dev II',
+            'avatar_url' => 'https://avatars.example/new.png',
+        ]);
+    }
+
+    public function test_keeps_the_stored_avatar_when_the_provider_sends_none(): void
+    {
+        config()->set('services.google', [
+            'client_id' => 'test-client-id',
+            'client_secret' => 'test-client-secret',
+            'redirect' => 'http://localhost:8000/api/v1/auth/google/callback',
+        ]);
+        User::factory()->oauth()->create([
+            'email' => 'alex@gmail.com',
+            'provider_id' => 'google-123',
+            'avatar_url' => 'https://avatars.example/kept.png',
+        ]);
+        $this->mockSocialiteUser('google-123', 'alex@gmail.com', 'Alex Dev');
+
+        $this->getJson('/api/v1/auth/google/callback?code=auth-code')->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'alex@gmail.com',
+            'avatar_url' => 'https://avatars.example/kept.png',
+        ]);
+    }
+
+    public function test_returns_the_user_schema_with_avatar_on_session_lookup(): void
+    {
+        $model = User::factory()->oauth()->create([
+            'email' => 'alex@gmail.com',
+            'avatar_url' => 'https://avatars.example/a.png',
+        ]);
+        $token = $model->createToken('tests')->plainTextToken;
+
+        $response = $this->withToken($token)->getJson('/api/user');
+
+        $response->assertOk()
+            ->assertJsonPath('email', 'alex@gmail.com')
+            ->assertJsonPath('avatar_url', 'https://avatars.example/a.png')
+            ->assertJsonStructure(['id', 'display_name', 'email', 'provider', 'avatar_url'])
+            ->assertJsonMissingPath('provider_id');
+    }
+
     public function test_redirects_with_an_error_when_the_email_belongs_to_another_account(): void
     {
         config()->set('services.google', [
@@ -276,12 +356,13 @@ final class AuthRegistrationTest extends TestCase
     /**
      * Fake the provider handshake: Socialite returns a fixed Google profile.
      */
-    private function mockSocialiteUser(string $id, string $email, string $name): void
+    private function mockSocialiteUser(string $id, string $email, string $name, ?string $avatar = null): void
     {
         $profile = new SocialiteUser;
         $profile->id = $id;
         $profile->email = $email;
         $profile->name = $name;
+        $profile->avatar = $avatar;
 
         $driver = Mockery::mock();
         $driver->shouldReceive('stateless')->andReturnSelf();

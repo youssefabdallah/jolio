@@ -91,4 +91,34 @@ final class User
     {
         return ! $this->provider->isOAuth();
     }
+
+    /**
+     * Refresh the provider-vouched profile on a returning OAuth sign-in
+     * (new avatar, possibly a new display name at the provider).
+     *
+     * Identity, credential, and provider linkage never change here —
+     * only the vouch data the provider re-asserts on every handshake.
+     *
+     * @throws InvalidUser
+     */
+    public function refreshOAuthProfile(string $displayName, ?string $avatarUrl): self
+    {
+        if ($this->isLocal()) {
+            throw InvalidUser::oauthWithLocalProvider();
+        }
+
+        if (trim($displayName) === '') {
+            throw InvalidUser::blankDisplayName();
+        }
+
+        return new self(
+            $this->id,
+            $this->email,
+            $displayName,
+            $this->provider,
+            null,
+            $this->providerId,
+            $avatarUrl,
+        );
+    }
 }

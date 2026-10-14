@@ -214,7 +214,10 @@
       focus:outline-none focus-visible:ring-2 focus-visible:ring-primary;
   }
   .dash-avatar-trigger .dash-avatar-btn {
-    @apply hover:opacity-100;
+    @apply hover:opacity-100 overflow-hidden;
+  }
+  .dash-avatar-img {
+    @apply w-full h-full object-cover;
   }
   .dash-avatar-name {
     @apply hidden md:block text-body font-bold text-ink max-w-32 truncate;
