@@ -1,5 +1,9 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use Src\Identity\Infrastructure\Providers\IdentityServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
+    AppServiceProvider::class,
+    IdentityServiceProvider::class,
 ];

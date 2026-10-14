@@ -1,9 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Src\Identity\Domain\Enums\AuthProvider;
 
+/**
+ * Identity users table (SPECS §6 User).
+ *
+ * ULID string primary key (never sequential — see backend skill §10).
+ * Local users carry a password hash; OAuth users carry provider_id instead
+ * (enforced in the Domain entity; mirrored here as nullability rules).
+ * Sessions live in their own migration file.
+ */
 return new class extends Migration
 {
     /**
@@ -12,11 +23,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            $table->ulid('id')->primary();
+            $table->string('display_name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
+            $table->string('provider', 32)->default(AuthProvider::Local->value);
+            $table->index('provider');
+            $table->string('provider_id')->nullable();
+            // NULL provider_ids never collide (Postgres + SQLite treat
+            // NULLs as distinct in unique constraints).
+            $table->unique(['provider', 'provider_id']);
+            $table->string('avatar_url', 2048)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -25,15 +43,6 @@ return new class extends Migration
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
         });
     }
 
@@ -44,6 +53,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
     }
 };

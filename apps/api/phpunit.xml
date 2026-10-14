@@ -28,6 +28,10 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!-- Feature tests run inside the api container against a dedicated
+             database (created once: see test setup). Connection/host/user
+             come from the container environment; only the database is pinned. -->
+        <env name="DB_DATABASE" value="jolio_testing" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
 </phpunit>
