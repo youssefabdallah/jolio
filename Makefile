@@ -17,7 +17,7 @@ $(ENV_FILE):
 	@cp .env.example $(ENV_FILE)
 	@echo "$(ENV_FILE) created from .env.example - set POSTGRES_PASSWORD, then re-run make."
 
-.PHONY: help up start down restart rebuild config ps logs logs-api logs-web health migrate fresh shell-api shell-web shell-db clean
+.PHONY: help up start down restart rebuild config ps logs logs-api logs-web health migrate fresh shell-api shell-web shell-db shell-frontend shell-backend clean
 
 help: ## Show this help
 	@grep -E '^[a-z-]+: .*## ' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ": .*## "}; {printf "  %-10s %s\n", $$1, $$2}'
@@ -64,14 +64,20 @@ health: ## Smoke-test both containers (api /up + web /)
 migrate: ## Run pending Laravel migrations (api must be up)
 	$(COMPOSE) exec api php artisan migrate --force
 
-fresh: ## Wipe the database and re-run migrations with seeds (destroys data)
-	$(COMPOSE) exec api php artisan migrate:fresh --seed --force
+fresh: ## Wipe the database and re-run migrations (destroys data, no seeding: image has no dev deps)
+	$(COMPOSE) exec api php artisan migrate:fresh --force
 
 shell-api: ## Open a shell in the api container
 	$(COMPOSE) exec api bash
 
 shell-web: ## Open a shell in the web container
 	$(COMPOSE) exec web sh
+
+shell-frontend: ## Open a shell in the frontend (web) container
+	$(COMPOSE) exec web sh
+
+shell-backend: ## Open a shell in the backend (api) container
+	$(COMPOSE) exec api bash
 
 shell-db: ## Open psql in the postgres container
 	$(COMPOSE) exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
