@@ -1,0 +1,66 @@
+/* Centralized UI copy — THE only place user-facing text lives.
+   NON-NEGOTIABLE: never create per-feature/per-screen copy files; add a
+   namespace here instead. Flat key/value maps per namespace so a future
+   locales/{en,fr} lookup can replace this import without touching components. */
+
+export const copy = {
+  auth: {
+    brandName: "Jolio",
+    brandInitial: "J",
+    subtitle: "Your AI job folio.",
+    emailLabel: "Email",
+    emailPlaceholder: "alex@dev.internal",
+    passwordLabel: "Password",
+    passwordPlaceholder: "••••••••••••",
+    showPasswordLabel: "Show password",
+    hidePasswordLabel: "Hide password",
+    forgotPassword: "Forgot password?",
+    signIn: "Sign in",
+    signingIn: "Signing in…",
+    orContinueWith: "or continue with",
+    continueWithGoogle: "Continue with Google",
+    noAccount: "Don't have an account?",
+    createAccount: "Create account",
+    registerHeading: "Create your account",
+    registerSubtext: "Start auditing and tailoring in seconds.",
+    displayNameLabel: "Display name",
+    displayNamePlaceholder: "e.g. Alex Chen",
+    workEmailLabel: "Work email",
+    workEmailPlaceholder: "alex@example.com",
+    newPasswordPlaceholder: "Create a secure password",
+    confirmPasswordLabel: "Confirm password",
+    confirmPasswordPlaceholder: "Repeat your password",
+    signUp: "Sign up",
+    alreadyHaveAccount: "Already have an account?",
+    signInLink: "Sign in",
+    signOut: "Sign out",
+    signingOut: "Signing out…",
+    emailExistsLogin: "An account with this email already exists. Try logging in instead.",
+    oauthExchanging: "Signing you in…",
+    oauthInvalid: "This sign-in link is invalid or expired.",
+    submitting: "Creating account…",
+    passwordMismatch: "The passwords do not match.",
+    displayNameRequired: "Please tell us your display name.",
+    emailInvalid: "That email address does not look right.",
+    passwordRequired: "A password is required.",
+    passwordMin: "Use at least 8 characters for your password.",
+    footer: "© 2025 Jolio. All rights reserved.",
+  },
+  common: {
+    notFoundTitle: "Page not found",
+    notFoundBody: "The page you are looking for does not exist or was moved.",
+    backHome: "Back to sign in",
+    errorTitle: "Something went wrong",
+    errorBody: "An unexpected error occurred. Try again, and contact support if it persists.",
+    tryAgain: "Try again",
+    failedConnection: "Could not reach the server. Check your connection and try again.",
+    unexpectedError: "Something went wrong. Please try again.",
+    forbidden: "This request was refused.",
+    unavailableTitle: "Service temporarily unavailable",
+    unavailableBody:
+      "We could not verify your session because the server is unreachable. Your sign-in was left untouched.",
+    unavailableHint: "Reload this page to try again.",
+  },
+} as const;
+
+export type Copy = typeof copy;
