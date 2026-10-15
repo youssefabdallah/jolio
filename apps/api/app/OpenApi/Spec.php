@@ -73,3 +73,39 @@ final class AuthResponse
 {
     private function __construct() {}
 }
+
+#[OA\Schema(
+    schema: 'ProfileResponse',
+    required: ['id', 'contact'],
+    properties: [
+        new OA\Property(property: 'id', type: 'string', example: '01JABCD1234EFGH5678JKLMNP'),
+        new OA\Property(
+            property: 'contact',
+            type: 'object',
+            required: ['full_name'],
+            properties: [
+                new OA\Property(property: 'full_name', type: 'string', example: 'Alex Dev'),
+                new OA\Property(property: 'email', type: 'string', format: 'email', nullable: true),
+                new OA\Property(property: 'phone', type: 'string', nullable: true),
+                new OA\Property(property: 'city', type: 'string', nullable: true),
+                new OA\Property(property: 'country', type: 'string', nullable: true),
+                new OA\Property(property: 'website', type: 'string', nullable: true),
+            ],
+        ),
+        new OA\Property(property: 'headline', type: 'string', maxLength: 140, nullable: true),
+        new OA\Property(property: 'summary', type: 'string', maxLength: 2000, nullable: true),
+        new OA\Property(property: 'skills', type: 'array', nullable: true, items: new OA\Items(type: 'object')),
+        new OA\Property(property: 'experience', type: 'array', nullable: true, items: new OA\Items(type: 'object')),
+        new OA\Property(property: 'education', type: 'array', nullable: true, items: new OA\Items(type: 'object')),
+        new OA\Property(property: 'languages', type: 'array', nullable: true, items: new OA\Items(type: 'object')),
+        new OA\Property(property: 'current_step', type: 'string', nullable: true, enum: ['contact', 'headline', 'skills', 'experience', 'education', 'languages', 'review']),
+        new OA\Property(property: 'completion_percent', type: 'integer', minimum: 0, maximum: 100),
+    ],
+)]
+/**
+ * Candidate profile document returned by PUT /api/profile.
+ */
+final class ProfileResponse
+{
+    private function __construct() {}
+}

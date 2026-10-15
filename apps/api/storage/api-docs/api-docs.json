@@ -113,6 +113,76 @@
                 ]
             }
         },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Current session user",
+                "description": "Session lookup for the SPA shell and its auth gate. Returns the public\nuser schema (id, display name, email, provider, avatar) — never the\nraw model, so provider ids and timestamps stay server-side.",
+                "operationId": "currentUser",
+                "responses": {
+                    "200": {
+                        "description": "Signed in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id",
+                                        "display_name",
+                                        "email",
+                                        "provider"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "example": "01JABCD1234EFGH5678JKLMNP"
+                                        },
+                                        "display_name": {
+                                            "type": "string",
+                                            "example": "Alex Dev"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "format": "email",
+                                            "example": "alex@dev.internal"
+                                        },
+                                        "provider": {
+                                            "type": "string",
+                                            "example": "google",
+                                            "enum": [
+                                                "local",
+                                                "google"
+                                            ]
+                                        },
+                                        "avatar_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/{provider}/callback": {
             "get": {
                 "tags": [
@@ -306,6 +376,223 @@
                     }
                 }
             }
+        },
+        "/api/profile": {
+            "get": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Read the caller's candidate profile",
+                "description": "Session-scoped profile read (SPECS FR-4, US-201).\n\nLooks up by the token's user id, so callers can only ever read\ntheir own row. Missing profiles answer 200 with null data — the\neditor renders a blank form instead of an error page.",
+                "operationId": "showProfile",
+                "responses": {
+                    "200": {
+                        "description": "Profile or empty",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "oneOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/ProfileResponse"
+                                                }
+                                            ],
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Create or replace the caller's candidate profile",
+                "description": "Replace the caller's candidate profile (SPECS FR-4, US-201).\n\nOwner-only by construction: the user id comes from the Sanctum\ntoken and the request passes ProfilePolicy on existing rows, so a\n200 here always means \"your profile was stored\".",
+                "operationId": "updateProfile",
+                "requestBody": {
+                    "description": "Per-step partial document: only the named step section is validated, the rest merges with the stored profile.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "current_step": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "enum": [
+                                            "contact",
+                                            "headline",
+                                            "skills",
+                                            "experience",
+                                            "education",
+                                            "languages",
+                                            "review"
+                                        ]
+                                    },
+                                    "contact": {
+                                        "required": [
+                                            "full_name"
+                                        ],
+                                        "properties": {
+                                            "full_name": {
+                                                "type": "string",
+                                                "example": "Alex Dev",
+                                                "maxLength": 120
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email"
+                                            },
+                                            "phone": {
+                                                "type": "string"
+                                            },
+                                            "city": {
+                                                "type": "string"
+                                            },
+                                            "country": {
+                                                "type": "string"
+                                            },
+                                            "website": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "headline": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 140
+                                    },
+                                    "summary": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 2000
+                                    },
+                                    "skills": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "experience": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "education": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "languages": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile stored",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "required": [
+                                                "profile"
+                                            ],
+                                            "properties": {
+                                                "profile": {
+                                                    "$ref": "#/components/schemas/ProfileResponse"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not the profile owner",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -397,6 +684,109 @@
                     }
                 },
                 "type": "object"
+            },
+            "ProfileResponse": {
+                "required": [
+                    "id",
+                    "contact"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Candidate profile document returned by PUT /api/profile.",
+                        "type": "string",
+                        "example": "01JABCD1234EFGH5678JKLMNP"
+                    },
+                    "contact": {
+                        "required": [
+                            "full_name"
+                        ],
+                        "properties": {
+                            "full_name": {
+                                "type": "string",
+                                "example": "Alex Dev"
+                            },
+                            "email": {
+                                "type": "string",
+                                "format": "email",
+                                "nullable": true
+                            },
+                            "phone": {
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "city": {
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "country": {
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "website": {
+                                "type": "string",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "headline": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 140
+                    },
+                    "summary": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2000
+                    },
+                    "skills": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "nullable": true
+                    },
+                    "experience": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "nullable": true
+                    },
+                    "education": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "nullable": true
+                    },
+                    "languages": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "nullable": true
+                    },
+                    "current_step": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "contact",
+                            "headline",
+                            "skills",
+                            "experience",
+                            "education",
+                            "languages",
+                            "review"
+                        ]
+                    },
+                    "completion_percent": {
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 0
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -404,6 +794,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Profile",
+            "description": "Profile"
         }
     ]
 }

@@ -1,0 +1,368 @@
+{
+  "$schema": "https://jolio.dev/schemas/validation/v1",
+  "context": "profile",
+  "notes": "Single source of truth for profile input validation (SPECS FR-4). Nested objects use sub-fields; repeatable sections use items (an object of sub-fields, or a scalar rule object with a rules key). The Domain aggregate re-validates everything on top.",
+  "sections": {
+    "profile": {
+      "contact": {
+        "rules": {
+          "required": true,
+          "array": true
+        },
+        "messages": {
+          "required": "profile.validation.contact_required"
+        },
+        "fields": {
+          "full_name": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 120
+            },
+            "messages": {
+              "required": "profile.validation.full_name_required"
+            }
+          },
+          "email": {
+            "rules": {
+              "required": true,
+              "email": "rfc",
+              "max": 255
+            },
+            "messages": {
+              "email": "profile.validation.email_invalid",
+              "required": "profile.validation.email_required"
+            }
+          },
+          "phone": {
+            "rules": {
+              "required": true,
+              "phone": true,
+              "max": 20
+            },
+            "messages": {
+              "required": "profile.validation.phone_required",
+              "phone": "profile.validation.phone_invalid",
+              "regex": "profile.validation.phone_invalid"
+            }
+          },
+          "city": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 120
+            },
+            "messages": {
+              "required": "profile.validation.city_required"
+            }
+          },
+          "country": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 120
+            },
+            "messages": {
+              "required": "profile.validation.country_required"
+            }
+          },
+          "website": {
+            "rules": {
+              "nullable": true,
+              "url": true,
+              "max": 2048
+            },
+            "messages": {
+              "url": "profile.validation.website_url"
+            }
+          }
+        }
+      },
+      "headline": {
+        "rules": {
+          "required": true,
+          "string": true,
+          "max": 140
+        },
+        "messages": {
+          "max": "profile.validation.headline_max",
+          "required": "profile.validation.headline_required"
+        }
+      },
+      "summary": {
+        "rules": {
+          "required": true,
+          "string": true,
+          "max": 2000
+        },
+        "messages": {
+          "max": "profile.validation.summary_max",
+          "required": "profile.validation.summary_required"
+        }
+      },
+      "skills": {
+        "rules": {
+          "required": true,
+          "array": true,
+          "max": 100,
+          "min": 1
+        },
+        "items": {
+          "group": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 60
+            },
+            "messages": {
+              "required": "profile.validation.group_required"
+            }
+          },
+          "name": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 80
+            },
+            "messages": {
+              "required": "profile.validation.skill_name_required"
+            }
+          },
+          "level": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "in": [
+                "beginner",
+                "intermediate",
+                "advanced",
+                "expert"
+              ]
+            },
+            "messages": {
+              "in": "profile.validation.skill_level_in",
+              "required": "profile.validation.skill_level_required"
+            }
+          }
+        },
+        "messages": {
+          "required": "profile.validation.skills_required",
+          "min": "profile.validation.skills_min"
+        }
+      },
+      "experience": {
+        "rules": {
+          "required": true,
+          "array": true,
+          "max": 30,
+          "min": 1
+        },
+        "items": {
+          "role": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 120
+            },
+            "messages": {
+              "required": "profile.validation.role_required"
+            }
+          },
+          "company": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 120
+            },
+            "messages": {
+              "required": "profile.validation.company_required"
+            }
+          },
+          "location": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 120
+            },
+            "messages": {
+              "required": "profile.validation.location_required"
+            }
+          },
+          "start_date": {
+            "rules": {
+              "required": true,
+              "date_format": "Y-m"
+            },
+            "messages": {
+              "date_format": "profile.validation.start_date_format",
+              "required": "profile.validation.start_date_required"
+            }
+          },
+          "end_date": {
+            "rules": {
+              "nullable": true,
+              "date_format": "Y-m"
+            },
+            "messages": {
+              "date_format": "profile.validation.end_date_format"
+            }
+          },
+          "bullets": {
+            "rules": {
+              "nullable": true,
+              "array": true,
+              "max": 20
+            },
+            "items": {
+              "rules": {
+                "required": true,
+                "string": true,
+                "max": 500
+              }
+            }
+          }
+        },
+        "messages": {
+          "required": "profile.validation.experience_required",
+          "min": "profile.validation.experience_min"
+        }
+      },
+      "education": {
+        "rules": {
+          "required": true,
+          "array": true,
+          "max": 20,
+          "min": 1
+        },
+        "items": {
+          "institution": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 160
+            },
+            "messages": {
+              "required": "profile.validation.institution_required"
+            }
+          },
+          "degree": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 160
+            },
+            "messages": {
+              "required": "profile.validation.degree_required"
+            }
+          },
+          "field": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 160
+            },
+            "messages": {
+              "required": "profile.validation.field_required"
+            }
+          },
+          "start_year": {
+            "rules": {
+              "required": true,
+              "integer": true,
+              "min": 1950,
+              "max": {
+                "offset_from_current_year": 5
+              }
+            },
+            "messages": {
+              "min": "profile.validation.year_min",
+              "max": "profile.validation.year_max",
+              "required": "profile.validation.start_year_required"
+            }
+          },
+          "end_year": {
+            "rules": {
+              "nullable": true,
+              "integer": true,
+              "min": 1950,
+              "max": {
+                "offset_from_current_year": 5
+              }
+            },
+            "messages": {
+              "min": "profile.validation.year_min",
+              "max": "profile.validation.year_max"
+            }
+          }
+        },
+        "messages": {
+          "required": "profile.validation.education_required",
+          "min": "profile.validation.education_min"
+        }
+      },
+      "languages": {
+        "rules": {
+          "required": true,
+          "array": true,
+          "max": 20,
+          "min": 1
+        },
+        "items": {
+          "language": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "max": 60
+            },
+            "messages": {
+              "required": "profile.validation.language_required"
+            }
+          },
+          "level": {
+            "rules": {
+              "required": true,
+              "string": true,
+              "in": [
+                "a1",
+                "a2",
+                "b1",
+                "b2",
+                "c1",
+                "c2",
+                "native"
+              ]
+            },
+            "messages": {
+              "in": "profile.validation.language_level_in",
+              "required": "profile.validation.language_level_required"
+            }
+          }
+        },
+        "messages": {
+          "required": "profile.validation.languages_required",
+          "min": "profile.validation.languages_min"
+        }
+      }
+    },
+    "wizard": {
+      "current_step": {
+        "rules": {
+          "nullable": true,
+          "string": true,
+          "in": [
+            "contact",
+            "headline",
+            "skills",
+            "experience",
+            "education",
+            "languages",
+            "review"
+          ]
+        },
+        "messages": {
+          "in": "profile.validation.step_invalid"
+        }
+      }
+    }
+  }
+}

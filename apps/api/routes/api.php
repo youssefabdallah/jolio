@@ -7,8 +7,18 @@ use Src\Identity\Presentation\Http\Controllers\MeController;
 use Src\Identity\Presentation\Http\Controllers\OAuthCallbackController;
 use Src\Identity\Presentation\Http\Controllers\OAuthRedirectController;
 use Src\Identity\Presentation\Http\Controllers\RegisterController;
+use Src\Profile\Presentation\Http\Controllers\ShowProfileController;
+use Src\Profile\Presentation\Http\Controllers\UpdateProfileController;
 
 Route::get('/user', MeController::class)->middleware('auth:sanctum');
+
+Route::get('/profile', ShowProfileController::class)
+    ->middleware(['auth:sanctum', 'throttle:60,1'])
+    ->name('profile.show');
+
+Route::put('/profile', UpdateProfileController::class)
+    ->middleware(['auth:sanctum', 'throttle:60,1'])
+    ->name('profile.update');
 
 Route::prefix('v1/auth')->middleware('throttle:60,1,auth-v1')->group(function (): void {
     Route::post('/register', RegisterController::class)

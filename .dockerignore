@@ -1,0 +1,23 @@
+# Root build context: keep images lean.
+.git/
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/dist/
+**/coverage/
+**/vendor/
+.env
+.env.*
+!.env.example
+apps/web/.env*
+**/*.log
+apps/api/storage/logs/*
+apps/api/storage/framework/cache/*
+apps/api/storage/framework/sessions/*
+apps/api/storage/framework/views/*
+apps/api/bootstrap/cache/*.php
+*.tsbuildinfo
+.phpunit.cache/
+.phpunit.result.cache
+tmp/

@@ -22,6 +22,7 @@ enum ErrorCode: string
     case InvalidCredentials = 'INVALID_CREDENTIALS';
     case OauthNotConfigured = 'OAUTH_NOT_CONFIGURED';
     case OauthFailed = 'OAUTH_FAILED';
+    case InvalidProfileValue = 'INVALID_PROFILE_VALUE';
 
     /**
      * HTTP status for the central API exception renderer.

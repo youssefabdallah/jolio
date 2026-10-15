@@ -24,11 +24,12 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /var/www/html
 
 # Install PHP deps first (better layer caching)
-COPY composer.json composer.lock ./
+COPY apps/api/composer.json apps/api/composer.lock ./
 RUN composer install --no-dev --no-interaction --prefer-dist --no-progress --no-scripts
 
 # Virgin application code
-COPY . .
+COPY apps/api/ ./
+COPY shared/validation ./shared/validation
 
 # Run the composer scripts now that artisan exists (no APP_KEY/DB needed here)
 RUN composer dump-autoload --optimize --no-dev \
@@ -38,7 +39,7 @@ RUN composer dump-autoload --optimize --no-dev \
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 80
