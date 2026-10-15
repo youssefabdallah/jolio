@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ApiError } from "@/lib/api/client";
 import { exchangeOAuthToken } from "@/lib/api/auth";
 import { isSafeNextPath } from "@/lib/auth/routes";
 import { copy } from "@/copy";
@@ -10,12 +11,13 @@ import { copy } from "@/copy";
 /**
  * OAuth landing page. The token — or a failure code the backend redirects
  * back with — arrives in the URL fragment, which never reaches the server,
- * so this boundary must run in the browser. Codes map to copy.ts messages;
- * the token goes straight to the exchange proxy.
+ * so this boundary must run in the browser. Each failure maps to its own
+ * message so users can tell an expired link from a dead backend: only a
+ * genuinely invalid token blames the link.
  */
 export default function OAuthCallback() {
   const router = useRouter();
-  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,6 +25,12 @@ export default function OAuthCallback() {
     /** Remove the fragment so the token never lingers in history. */
     function clearFragment(): void {
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+
+    function fail(text: string): void {
+      if (!cancelled) {
+        setMessage(text);
+      }
     }
 
     async function completeHandshake(): Promise<void> {
@@ -33,25 +41,24 @@ export default function OAuthCallback() {
 
       const failed = params.get("error");
       if (failed) {
-        if (!cancelled) {
-          setErrorCode(failed);
-        }
+        fail(failed === "EMAIL_TAKEN" ? copy.auth.emailExistsLogin : copy.auth.oauthInvalid);
         return;
       }
 
       const token = params.get("token");
       if (!token) {
-        if (!cancelled) {
-          setErrorCode("UNKNOWN");
-        }
+        fail(copy.auth.oauthInvalid);
         return;
       }
 
       try {
         await exchangeOAuthToken(token);
-      } catch {
-        if (!cancelled) {
-          setErrorCode("UNKNOWN");
+      } catch (thrown) {
+        // A dead backend is an outage, not an expired link — say so.
+        if (thrown instanceof ApiError && (thrown.status === 0 || thrown.status === 502)) {
+          fail(copy.common.failedConnection);
+        } else {
+          fail(copy.auth.oauthInvalid);
         }
         return;
       }
@@ -74,10 +81,10 @@ export default function OAuthCallback() {
 
   return (
     <div className="w-full max-w-auth bg-card rounded-card border border-rule p-8 my-8 text-center">
-      {errorCode ? (
+      {message ? (
         <>
           <p role="alert" className="text-body text-danger-deep">
-            {errorCode === "EMAIL_TAKEN" ? copy.auth.emailExistsLogin : copy.auth.oauthInvalid}
+            {message}
           </p>
           <p className="text-body text-muted mt-4">
             <Link href="/" className="text-primary font-medium hover:underline">

@@ -10,12 +10,12 @@ afterEach(() => {
 describe("getApiBaseUrl", () => {
   it("defaults to the compose service URL", () => {
     delete process.env.API_BASE_URL;
-    expect(getApiBaseUrl()).toBe("http://api:8000");
+    expect(getApiBaseUrl()).toBe("http://api");
   });
 
   it("normalizes to the origin so endpoint paths cannot smuggle input", () => {
-    process.env.API_BASE_URL = "http://api:8000/some/prefix/";
-    expect(getApiBaseUrl()).toBe("http://api:8000");
+    process.env.API_BASE_URL = "http://api/some/prefix/";
+    expect(getApiBaseUrl()).toBe("http://api");
   });
 
   it.each(["not-a-url", "ftp://files.example", "http://user:pass@api:8000"])(

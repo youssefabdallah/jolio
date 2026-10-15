@@ -23,7 +23,11 @@ const MAX_VERIFY_TIMEOUT_MS = 10_000;
  * each call site, never derived from user input.
  */
 export function getApiBaseUrl(): string {
-  const raw = (process.env.API_BASE_URL ?? "http://api:8000").trim();
+  // No :8000 fallback: inside the compose network the API serves port
+  // 80, so a wrong default fails every server-to-server call with a
+  // misleading 502. Host-side dev sets API_BASE_URL in apps/web/.env
+  // (gitignored, never shipped); containers get it from compose.
+  const raw = (process.env.API_BASE_URL ?? "http://api").trim();
 
   let url: URL;
   try {

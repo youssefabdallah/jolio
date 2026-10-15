@@ -7,6 +7,7 @@ namespace Src\Identity\Presentation\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Src\Shared\Application\Validation\ValidationSpec;
 
 /**
  * Validates local-credential registration input (public route).
@@ -22,15 +23,14 @@ class RegisterRequest extends FormRequest
     }
 
     /**
+     * Rules and messages both come from shared/validation/auth.json —
+     * one edit updates Laravel and the SPA yup schemas together.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
     {
-        return [
-            'display_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email:rfc', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ];
+        return ValidationSpec::section('auth', 'register')['rules'];
     }
 
     /**
@@ -38,15 +38,9 @@ class RegisterRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'display_name.required' => __('identity.validation.display_name_required'),
-            'email.required' => __('identity.validation.email_required'),
-            'email.email' => __('identity.validation.email_invalid'),
-            'email.unique' => __('identity.validation.email_taken'),
-            'password.required' => __('identity.validation.password_required'),
-            'password.min' => __('identity.validation.password_min'),
-            'password.confirmed' => __('identity.validation.password_confirmed'),
-        ];
+        $keys = ValidationSpec::section('auth', 'register')['messageKeys'];
+
+        return array_map(fn (string $key): string => __($key), $keys);
     }
 
     /**

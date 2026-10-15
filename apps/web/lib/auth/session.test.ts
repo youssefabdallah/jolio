@@ -29,7 +29,9 @@ describe("verifySession", () => {
     vi.stubGlobal("fetch", fetchMock);
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
+    vi.stubEnv("API_BASE_URL", "http://api:8000");
     const result = await verifySession(TOKEN);
+    vi.unstubAllEnvs();
 
     expect(result).toEqual({ status: "authenticated", user: USER });
     expect(fetchMock).toHaveBeenCalledOnce();

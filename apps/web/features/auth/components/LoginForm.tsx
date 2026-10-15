@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import * as yup from "yup";
 import { ArrowRightIcon, EyeIcon, EyeOffIcon } from "@/components/icons";
 import { Button, FormError, IconButton, TextInput } from "@/components/ui";
 import { ApiError } from "@/lib/api/client";
 import { login } from "@/lib/api/auth";
+import { loginSchema } from "@/lib/validation/auth";
 import { isSafeNextPath } from "@/lib/auth/routes";
 import { copy } from "@/copy";
 
 type FieldErrors = Partial<Record<"email" | "password", string>>;
-
-const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginForm() {
   const router = useRouter();
@@ -27,26 +27,35 @@ export default function LoginForm() {
     }
 
     const data = new FormData(event.currentTarget);
-    const email = String(data.get("email") ?? "").trim();
-    const password = String(data.get("password") ?? "");
+    const raw = {
+      email: String(data.get("email") ?? "").trim(),
+      password: String(data.get("password") ?? ""),
+    };
 
-    // Fast client feedback; the server re-validates everything.
-    const local: FieldErrors = {};
-    if (!EMAIL_SHAPE.test(email)) {
-      local.email = copy.auth.emailInvalid;
+    // Fast client feedback from the shared spec; the server
+    // re-validates the same spec before touching anything.
+    try {
+      await loginSchema().validate(raw, { abortEarly: false });
+    } catch (thrown) {
+      if (thrown instanceof yup.ValidationError) {
+        const local: FieldErrors = {};
+        for (const issue of thrown.inner) {
+          if ((issue.path === "email" || issue.path === "password") && local[issue.path] === undefined) {
+            local[issue.path] = issue.message;
+          }
+        }
+        setFieldErrors(local);
+        setFormError(null);
+        return;
+      }
+      throw thrown;
     }
-    if (!password) {
-      local.password = copy.auth.passwordRequired;
-    }
-    setFieldErrors(local);
+    setFieldErrors({});
     setFormError(null);
-    if (Object.keys(local).length > 0) {
-      return;
-    }
 
     setSubmitting(true);
     try {
-      await login({ email, password });
+      await login(raw);
       // Post-login return: only a validated same-origin path is honored;
       // anything else (absolute URLs, //evil, backslashes) falls back to
       // the dashboard, so ?next= can never become an open redirect.

@@ -139,7 +139,9 @@ describe("proxy security behavior", () => {
   it("ignores user-controlled Host headers for the backend destination", async () => {
     const fetchMock = vi.fn(async () => json(200, USER));
     vi.stubGlobal("fetch", fetchMock);
+    vi.stubEnv("API_BASE_URL", "http://api:8000");
     await proxy(req("/dashboard", "good-token", { host: "evil.example" }));
+    vi.unstubAllEnvs();
     const [url] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("http://api:8000/api/user");
     expect(new URL(url).host).not.toBe("evil.example");

@@ -7,6 +7,7 @@ namespace Src\Identity\Presentation\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Src\Shared\Application\Validation\ValidationSpec;
 
 /**
  * Validates local-credential sign-in input (public route).
@@ -22,14 +23,14 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * Rules and messages both come from shared/validation/auth.json —
+     * one edit updates Laravel and the SPA yup schemas together.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
     {
-        return [
-            'email' => ['required', 'email:rfc', 'max:255'],
-            'password' => ['required', 'string'],
-        ];
+        return ValidationSpec::section('auth', 'login')['rules'];
     }
 
     /**
@@ -37,11 +38,9 @@ class LoginRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'email.required' => __('identity.validation.email_required'),
-            'email.email' => __('identity.validation.email_invalid'),
-            'password.required' => __('identity.validation.password_required'),
-        ];
+        $keys = ValidationSpec::section('auth', 'login')['messageKeys'];
+
+        return array_map(fn (string $key): string => __($key), $keys);
     }
 
     /**

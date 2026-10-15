@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import * as yup from "yup";
 import { ArrowRightIcon, EyeIcon, EyeOffIcon } from "@/components/icons";
 import { Button, FormError, IconButton, TextInput } from "@/components/ui";
 import { ApiError } from "@/lib/api/client";
 import { register } from "@/lib/api/auth";
+import { registerSchema } from "@/lib/validation/auth";
 import { isSafeNextPath } from "@/lib/auth/routes";
 import { copy } from "@/copy";
 
 type FieldErrors = Partial<Record<"display_name" | "email" | "password" | "password_confirmation", string>>;
-
-const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -33,25 +33,33 @@ export default function RegisterForm() {
     const password = String(data.get("password") ?? "");
     const passwordConfirmation = String(data.get("passwordConfirmation") ?? "");
 
-    // Fast client feedback; the server re-validates everything.
-    const local: FieldErrors = {};
-    if (!displayName) {
-      local.display_name = copy.auth.displayNameRequired;
+    // Fast client feedback from the shared spec (spec keys); the
+    // server re-validates the same spec before touching anything.
+    const raw = {
+      display_name: displayName,
+      email,
+      password,
+      password_confirmation: passwordConfirmation,
+    };
+    try {
+      await registerSchema().validate(raw, { abortEarly: false });
+    } catch (thrown) {
+      if (thrown instanceof yup.ValidationError) {
+        const local: FieldErrors = {};
+        for (const issue of thrown.inner) {
+          const key = issue.path as keyof FieldErrors | undefined;
+          if (key && key in DISPLAY_KEYS && local[key] === undefined) {
+            local[key] = issue.message;
+          }
+        }
+        setFieldErrors(local);
+        setFormError(null);
+        return;
+      }
+      throw thrown;
     }
-    if (!EMAIL_SHAPE.test(email)) {
-      local.email = copy.auth.emailInvalid;
-    }
-    if (password.length < 8) {
-      local.password = copy.auth.passwordMin;
-    }
-    if (passwordConfirmation !== password) {
-      local.password_confirmation = copy.auth.passwordMismatch;
-    }
-    setFieldErrors(local);
+    setFieldErrors({});
     setFormError(null);
-    if (Object.keys(local).length > 0) {
-      return;
-    }
 
     setSubmitting(true);
     try {

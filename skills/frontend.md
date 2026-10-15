@@ -306,7 +306,28 @@ Keep boundaries explicit:
   behind clear modules.
 - **Validation:** validate at trust boundaries with a schema or
   explicit parser; TypeScript types alone do not validate runtime
-  data.
+  data. All form and input validation uses **yup**, built from the
+  canonical specs — never hand-rolled regexes or length checks in
+  components.
+- **Single-source validation (non-negotiable):** frontend yup
+  schemas and backend FormRequest rules both derive from
+  `shared/validation/*.json`, organized by context
+  (`lib/validation/<context>.ts` imports the spec through
+  `lib/validation/builder.ts`). Editing the JSON updates both
+  sides together; rules the browser cannot enforce (e.g. DB
+  uniqueness) are marked `serverOnly` and skipped client-side.
+  Message values in the specs are translation keys resolved per
+  side (`copy.ts` / `lang/*.php`), so both sides report identical
+  text. Exotic rules outside the shared DSL stay hand-written on
+  their own side and must be documented as exceptions.
+- **Validate every submit, blame the input (non-negotiable):** no
+  form submits without running its yup schema first; the server
+  re-validates regardless. Every input shows its own failure
+  message beneath it (via `aria-describedby`), using the friendly
+  translated message only — never raw paths (`contact.full_name:`),
+  keys, or backend envelopes. Backend field details map onto the
+  same inputs by dot-path; anything unmappable falls back to the
+  top-level form error.
 - **Orchestration:** server actions, route handlers, or feature
   services coordinate validation, authorization, and mutations.
 - **State:** keep state as close as practical to the components that

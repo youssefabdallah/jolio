@@ -83,4 +83,9 @@ shell-db: ## Open psql in the postgres container
 	$(COMPOSE) exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
 clean: ## Stop containers AND delete data volumes (destroys the database)
-	$(COMPOSE) down -v
+	@read -p "Delete ALL data volumes (database gone)? [y/N] " ans; \
+	if [ "$$ans" = "y" ] || [ "$$ans" = "Y" ]; then \
+		$(COMPOSE) down -v; \
+	else \
+		echo "Aborted - data kept. Use 'make down' to stop without deleting."; \
+	fi
