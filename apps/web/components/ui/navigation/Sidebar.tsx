@@ -58,11 +58,14 @@ export default function Sidebar({ active = "dashboard" }: { active?: string }) {
           <span className="dash-soon">{copy.dashboard.soonBadge}</span>
         </button>
 
-        <button type="button" disabled className="dash-nav-link" aria-disabled="true">
+        <Link
+          href="/profile"
+          aria-current={active === "profile" ? "page" : undefined}
+          className={`dash-nav-link ${active === "profile" ? "dash-nav-link-active" : ""}`}
+        >
           <UserIcon />
           <span>{copy.dashboard.navProfile}</span>
-          <span className="dash-soon">{copy.dashboard.soonBadge}</span>
-        </button>
+        </Link>
 
         <button type="button" disabled className="dash-nav-link" aria-disabled="true">
           <TuneIcon />

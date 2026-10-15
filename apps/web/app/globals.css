@@ -78,6 +78,12 @@
   body {
     @apply min-h-full flex flex-col bg-paper text-ink font-sans;
   }
+  /* Tailwind v4 preflight resets buttons to `cursor: default` —
+     every clickable button shows the hand again (disabled keeps default). */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 /* ============================ components ================================ */
@@ -100,30 +106,69 @@
 
   /* --- buttons (h-9, 6px radius, 14px regular) --- */
   .btn-primary {
-    @apply inline-flex items-center justify-center h-9 px-4 rounded-control
+    @apply inline-flex items-center justify-center gap-2 h-9 px-4 rounded-control
       bg-primary text-white text-body
       hover:bg-primary-hover active:bg-primary-active
+      transition-all duration-150 active:scale-[0.98]
       disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center h-9 px-4 rounded-control
+    @apply inline-flex items-center justify-center gap-2 h-9 px-4 rounded-control
       bg-card border border-rule text-ink text-body
-      hover:bg-paper disabled:opacity-50 disabled:pointer-events-none;
+      hover:bg-paper transition-all duration-150 active:scale-[0.98]
+      disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-destructive {
-    @apply inline-flex items-center justify-center h-9 px-4 rounded-control
+    @apply inline-flex items-center justify-center gap-2 h-9 px-4 rounded-control
       bg-card border border-danger text-danger text-body
-      hover:bg-danger-bg disabled:opacity-50 disabled:pointer-events-none;
+      hover:bg-danger-bg transition-all duration-150 active:scale-[0.98]
+      disabled:opacity-50 disabled:pointer-events-none;
   }
 
   /* --- form --- */
   .label {
     @apply block text-body text-ink mb-1;
-  }
-  .input {
+  }  .input {
     @apply w-full h-9 px-3 rounded-control bg-card border border-rule
       text-body text-ink placeholder:text-muted
       focus:outline-none focus:border-primary;
+  }
+
+  /* --- field alert (danger): per-input errors render as a compact
+     alert box, not plain text. Appears with a short fade-and-rise;
+     motion is disabled for reduced-motion users. */
+  .field-alert {
+    @apply flex items-start gap-1.5 mt-1.5 px-2.5 py-1.5 rounded-control
+      bg-danger-bg border border-danger text-danger-deep text-caption
+      font-mono;
+    animation: field-alert-in 180ms ease-out;
+  }
+  @keyframes field-alert-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .field-alert {
+      animation: none;
+    }
+  }
+
+  /* --- success alert: same motion language as field alerts, teal. */
+  .success-alert {
+    @apply flex items-center gap-2 px-3 py-2 rounded-control
+      bg-teal-bg border border-teal text-teal-deep text-body;
+    animation: field-alert-in 180ms ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .success-alert {
+      animation: none;
+    }
   }
 
   /* --- status chips (22px pill, mono 12px) --- */
@@ -294,6 +339,123 @@
   }
   .dash-footer-links {
     @apply flex items-center gap-4;
+  }
+
+  /* --- form grids (profile editor) --- */
+  .form-grid {
+    @apply grid gap-4 md:grid-cols-2;
+  }
+  .form-row {
+    @apply grid gap-3;
+  }
+  .form-row-3 {
+    @apply grid gap-3 md:grid-cols-3;
+  }
+  .form-actions {
+    @apply flex items-center gap-3;
+  }
+  .select {
+    @apply w-full h-9 px-3 rounded-control bg-card border border-rule
+      text-body text-ink focus:outline-none focus:border-primary;
+  }
+  .textarea {
+    @apply w-full px-3 py-2 rounded-control bg-card border border-rule
+      text-body text-ink placeholder:text-muted
+      focus:outline-none focus:border-primary;
+  }
+
+  /* --- rich text editor (experience bullets) --- */
+  .rich-wrap {
+    @apply rounded-control bg-card border border-rule overflow-hidden
+      focus-within:border-primary;
+  }
+  .rich-wrap-invalid {
+    @apply border-danger;
+  }
+  .rich-toolbar {
+    @apply flex items-center gap-1 px-2 py-1.5 border-b border-rule bg-paper;
+  }
+  .rich-toolbar-btn {
+    @apply w-8 h-8 inline-flex items-center justify-center rounded-control
+      text-body text-muted hover:text-ink hover:bg-card
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary;
+  }
+  .rich-toolbar-btn-active {
+    @apply text-primary-deep bg-card border border-rule;
+  }
+  .rich-editor {
+    @apply min-h-24 max-h-32 overflow-y-auto px-3 py-2 text-body text-ink outline-none;
+  }
+  .rich-editor p {
+    @apply my-1;
+  }
+  .rich-editor ul {
+    @apply list-disc pl-5 my-1 space-y-1;
+  }
+  .rich-editor strong {
+    @apply font-bold;
+  }
+
+  /* --- wizard stepper + completion --- */
+  .stepper {
+    @apply flex flex-wrap gap-2 list-none p-0 m-0;
+  }
+  .stepper-item {
+    @apply flex items-center gap-2 h-9 px-3 rounded-control border border-rule
+      bg-card text-caption text-muted font-mono transition-colors duration-200;
+  }
+  .stepper-item-active {
+    @apply border-primary text-primary-deep font-bold;
+  }
+  .stepper-item-done {
+    @apply text-teal-deep border-teal;
+  }
+  .stepper-icon {
+    @apply inline-flex shrink-0;
+  }
+
+  /* --- step content transition: remounts on step change (key), so
+     each advance fades and rises once. Disabled for reduced motion. */
+  .step-enter {
+    animation: step-in 240ms ease-out;
+  }
+  @keyframes step-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .step-enter {
+      animation: none;
+    }
+    .btn-primary,
+    .btn-secondary,
+    .btn-destructive {
+      transition: none;
+    }
+    .stepper-item {
+      transition: none;
+    }
+  }
+  .completion-track {
+    @apply w-full h-2 rounded-full bg-paper border border-rule overflow-hidden;
+  }
+  .completion-fill {
+    @apply h-full transition-all duration-300;
+  }
+  .completion-fill-red {
+    @apply h-full bg-danger transition-all duration-300;
+  }
+  .completion-fill-orange {
+    @apply h-full bg-amber-warn transition-all duration-300;
+  }
+  .completion-fill-green {
+    @apply h-full bg-teal transition-all duration-300;
   }
 
   /* --- lists --- */

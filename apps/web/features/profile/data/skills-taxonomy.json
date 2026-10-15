@@ -1,0 +1,202 @@
+{
+  "groups": [
+    {
+      "name": "Backend",
+      "skills": [
+        "PHP",
+        "Laravel",
+        "Symfony",
+        "Java",
+        "Spring Boot",
+        "Python",
+        "Django",
+        "FastAPI",
+        "Node.js",
+        "Express.js",
+        "NestJS",
+        "Go",
+        "Ruby on Rails",
+        "C#",
+        ".NET"
+      ]
+    },
+    {
+      "name": "Frontend",
+      "skills": [
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Next.js",
+        "Vue.js",
+        "Nuxt.js",
+        "Angular",
+        "Svelte",
+        "HTML5",
+        "CSS3",
+        "Tailwind CSS",
+        "Redux",
+        "Vite",
+        "Webpack"
+      ]
+    },
+    {
+      "name": "Mobile",
+      "skills": [
+        "Flutter",
+        "Dart",
+        "React Native",
+        "Kotlin",
+        "Swift",
+        "SwiftUI",
+        "Jetpack Compose",
+        "Ionic",
+        "Android SDK",
+        "iOS SDK"
+      ]
+    },
+    {
+      "name": "DevOps & CI/CD",
+      "skills": [
+        "Docker",
+        "Kubernetes",
+        "Jenkins",
+        "GitHub Actions",
+        "GitLab CI",
+        "Ansible",
+        "Terraform",
+        "Helm",
+        "ArgoCD",
+        "Prometheus",
+        "Grafana",
+        "Nginx"
+      ]
+    },
+    {
+      "name": "Cloud",
+      "skills": [
+        "AWS",
+        "Microsoft Azure",
+        "Google Cloud",
+        "Cloudflare",
+        "Firebase",
+        "Serverless",
+        "Lambda",
+        "S3",
+        "EC2",
+        "Azure DevOps"
+      ]
+    },
+    {
+      "name": "Databases",
+      "skills": [
+        "PostgreSQL",
+        "MySQL",
+        "MongoDB",
+        "Redis",
+        "SQLite",
+        "MariaDB",
+        "Elasticsearch",
+        "DynamoDB",
+        "Cassandra",
+        "Oracle DB"
+      ]
+    },
+    {
+      "name": "Data & AI",
+      "skills": [
+        "SQL",
+        "Python",
+        "Pandas",
+        "NumPy",
+        "Apache Spark",
+        "TensorFlow",
+        "PyTorch",
+        "Scikit-learn",
+        "Machine Learning",
+        "Deep Learning",
+        "NLP",
+        "Data Analysis",
+        "Power BI",
+        "Tableau",
+        "ETL"
+      ]
+    },
+    {
+      "name": "Cybersecurity",
+      "skills": [
+        "Penetration Testing",
+        "OWASP",
+        "Burp Suite",
+        "Network Security",
+        "Cryptography",
+        "IAM",
+        "SIEM",
+        "Vulnerability Assessment",
+        "Ethical Hacking",
+        "Firewalls"
+      ]
+    },
+    {
+      "name": "QA & Testing",
+      "skills": [
+        "Selenium",
+        "Cypress",
+        "Playwright",
+        "Jest",
+        "Vitest",
+        "PHPUnit",
+        "JUnit",
+        "Postman",
+        "Test Automation",
+        "Manual Testing",
+        "JMeter",
+        "Cucumber"
+      ]
+    },
+    {
+      "name": "APIs & Integration",
+      "skills": [
+        "REST",
+        "GraphQL",
+        "gRPC",
+        "WebSockets",
+        "OAuth 2.0",
+        "OpenAPI/Swagger",
+        "RabbitMQ",
+        "Apache Kafka",
+        "Webhooks",
+        "Microservices"
+      ]
+    },
+    {
+      "name": "Tools & Collaboration",
+      "skills": [
+        "Git",
+        "GitHub",
+        "GitLab",
+        "Jira",
+        "Confluence",
+        "VS Code",
+        "Figma",
+        "Agile/Scrum",
+        "Linux",
+        "Bash"
+      ]
+    },
+    {
+      "name": "System & Network",
+      "skills": [
+        "Linux Administration",
+        "Bash Scripting",
+        "Networking (TCP/IP)",
+        "DNS",
+        "VPN",
+        "Apache",
+        "Monitoring",
+        "Backup & Recovery",
+        "Virtualization",
+        "Proxmox"
+      ]
+    }
+  ]
+}

@@ -8,3 +8,5 @@ export { default as IconButton } from "./IconButton";
 export type { IconButtonProps } from "./IconButton";
 export { default as TextInput } from "./TextInput";
 export type { TextInputProps } from "./TextInput";
+export { default as Autocomplete } from "./inputs/Autocomplete";
+export type { AutocompleteOption } from "./inputs/Autocomplete";

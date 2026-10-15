@@ -41,7 +41,7 @@ export default function TextInput({
         {trailing}
       </div>
       {error ? (
-        <p id={errorId} className="text-caption text-danger-deep mt-1">
+        <p id={errorId} className="field-alert">
           {error}
         </p>
       ) : null}

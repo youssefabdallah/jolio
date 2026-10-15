@@ -9,6 +9,7 @@ import DashboardFooter from "./DashboardFooter";
 export interface DashboardShellProps {
   user: RegisteredUser;
   children: ReactNode;
+  active?: string;
 }
 
 /**
@@ -16,13 +17,13 @@ export interface DashboardShellProps {
  * Client boundary is the mobile sidebar toggle only; Sidebar itself
  * and the footer stay server-renderable and JS-free.
  */
-export default function DashboardShell({ user, children }: DashboardShellProps) {
+export default function DashboardShell({ user, children, active = "dashboard" }: DashboardShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="dash-shell">
       <aside className="dash-sidebar">
-        <Sidebar active="dashboard" />
+        <Sidebar active={active} />
       </aside>
 
       {menuOpen ? (
@@ -33,7 +34,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
             onClick={() => setMenuOpen(false)}
           />
           <aside className="dash-sidebar-mobile">
-            <Sidebar active="dashboard" />
+            <Sidebar active={active} />
           </aside>
         </div>
       ) : null}

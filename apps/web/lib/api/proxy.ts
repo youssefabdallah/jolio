@@ -35,6 +35,9 @@ export function forbiddenResponse() {
 /** Upper bound for auth JSON bodies (login/register/OAuth exchange). */
 export const MAX_AUTH_BODY_BYTES = 32 * 1024;
 
+/** Upper bound for profile documents (bounded sections, bullets). */
+export const MAX_PROFILE_BODY_BYTES = 512 * 1024;
+
 /** Upper bound for a single opaque token string. */
 export const MAX_TOKEN_CHARS = 8 * 1024;
 

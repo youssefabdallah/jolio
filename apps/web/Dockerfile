@@ -3,12 +3,13 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
 FROM base AS deps
-COPY package.json package-lock.json ./
+COPY apps/web/package.json apps/web/package-lock.json ./
 RUN npm ci
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY apps/web/ ./
+COPY shared/validation ./shared/validation
 RUN npm run build
 
 FROM base AS runner
