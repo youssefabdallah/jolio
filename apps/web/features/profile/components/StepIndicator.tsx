@@ -2,6 +2,7 @@
 
 import type { ComponentType } from "react";
 import { copy } from "@/copy";
+import { CheckCircleIcon } from "@/components/icons";
 import type { IconProps } from "@/components/icons";
 
 export interface WizardStep {
@@ -33,13 +34,13 @@ export default function StepIndicator({
         {steps.map((step, index) => {
           const done = index < current;
           const active = index === current;
-          const StepIcon = step.icon;
+          const StepIcon = done && !active ? CheckCircleIcon : step.icon;
           const inner = (
             <>
               <span className="stepper-icon" aria-hidden="true">
                 <StepIcon size={16} />
               </span>
-              <span>{step.label}</span>
+              <span className="truncate">{step.label}</span>
             </>
           );
           return (
@@ -52,7 +53,7 @@ export default function StepIndicator({
                 <button
                   type="button"
                   onClick={() => onSelect(index)}
-                  className="flex items-center gap-2"
+                  className="flex min-w-0 flex-1 items-center justify-center gap-2"
                   aria-label={`${copy.profile.stepLabel} ${step.label}`}
                 >
                   {inner}

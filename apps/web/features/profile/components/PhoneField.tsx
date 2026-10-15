@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
 import { copy } from "@/copy";
-import { TextInput } from "@/components/ui";
 import CountryCodeSelect from "./CountryCodeSelect";
 import { EXCLUDED_COUNTRY_CODES } from "./countryFlag";
 
@@ -40,9 +39,10 @@ function splitStored(value: string): { country: CountryCode; national: string } 
 }
 
 /**
- * Phone input with a country-code selector. Stores the full
- * international number (E.164), which is exactly what both validators
- * check — the selector and the digits never travel separately.
+ * Phone input with a country-code selector joined to the number field.
+ * Stores the full international number (E.164), which is exactly what
+ * both validators check — the selector and the digits never travel
+ * separately.
  */
 export default function PhoneField({
   value,
@@ -76,33 +76,45 @@ export default function PhoneField({
     onChange(combined);
   }
 
+  const errorId = "profile-phone-error";
+
   return (
-    <div className="flex gap-2 items-start">
-      <div className="w-28 shrink-0">
-        <CountryCodeSelect
-          value={country}
-          onChange={(next) => {
-            setCountry(next);
-            emit(next, national);
-          }}
-        />
-      </div>
-      <div className="flex-1">
-        <TextInput
+    <div>
+      <span className="label" id="profile-phone-label">
+        {copy.profile.phoneLabel}
+      </span>
+      <div className="phone-join">
+        <div className="phone-code shrink-0">
+          <CountryCodeSelect
+            value={country}
+            onChange={(next) => {
+              setCountry(next);
+              emit(next, national);
+            }}
+          />
+        </div>
+        <input
           id="profile-phone"
           name="phone"
           type="tel"
-          label={copy.profile.phoneLabel}
-          placeholder={copy.profile.phPhone}
-          value={national}
+          aria-labelledby="profile-phone-label"
+          aria-describedby={error ? errorId : undefined}
+          aria-invalid={error ? true : undefined}
           autoComplete="tel"
-          error={error}
+          placeholder={copy.profile.phPhone}
+          className="input phone-national"
+          value={national}
           onChange={(event) => {
             setNational(event.target.value);
             emit(country, event.target.value);
           }}
         />
       </div>
+      {error ? (
+        <p id={errorId} className="field-alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

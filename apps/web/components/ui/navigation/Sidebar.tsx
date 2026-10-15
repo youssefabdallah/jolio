@@ -1,23 +1,42 @@
 import Link from "next/link";
 import { copy } from "@/copy";
-import {
-  ArticleIcon,
-  DashboardIcon,
-  HelpIcon,
-  SearchIcon,
-  SettingsIcon,
-  TuneIcon,
-  UserIcon,
-} from "@/components/icons";
+import { secondaryNav, workspaceNav, type NavItem } from "./navItems";
 
 /**
  * Product sidebar from the validated Stitch design: brand, workspace
  * navigation, secondary links, and the environment chip.
- * Pure presentational server component. Only Dashboard navigates
- * today; everything without a page renders disabled with a Soon chip
- * instead of a dead link.
+ * Pure presentational server component. Only Dashboard and Profile
+ * navigate today; everything without a page renders disabled with a Soon
+ * chip instead of a dead link.
  */
 export default function Sidebar({ active = "dashboard" }: { active?: string }) {
+  function renderItem(item: NavItem) {
+    const Icon = item.icon;
+    const chip = item.soon ? <span className="dash-soon">{copy.dashboard.soonBadge}</span> : null;
+
+    if (!item.href) {
+      return (
+        <button key={item.key} type="button" disabled className="dash-nav-link" aria-disabled="true">
+          <Icon />
+          <span>{item.label}</span>
+          {chip}
+        </button>
+      );
+    }
+
+    return (
+      <Link
+        key={item.key}
+        href={item.href}
+        aria-current={active === item.key ? "page" : undefined}
+        className={`dash-nav-link ${active === item.key ? "dash-nav-link-active" : ""}`}
+      >
+        <Icon />
+        <span>{item.label}</span>
+      </Link>
+    );
+  }
+
   return (
     <nav className="flex flex-col h-full" aria-label={copy.dashboard.navSection}>
       <div className="dash-sidebar-brand">
@@ -36,54 +55,8 @@ export default function Sidebar({ active = "dashboard" }: { active?: string }) {
 
       <div className="dash-nav">
         <p className="dash-nav-section">{copy.dashboard.navSection}</p>
-
-        <Link
-          href="/dashboard"
-          aria-current={active === "dashboard" ? "page" : undefined}
-          className={`dash-nav-link ${active === "dashboard" ? "dash-nav-link-active" : ""}`}
-        >
-          <DashboardIcon />
-          <span>{copy.dashboard.navDashboard}</span>
-        </Link>
-
-        <button type="button" disabled className="dash-nav-link" aria-disabled="true">
-          <SearchIcon />
-          <span>{copy.dashboard.navSearch}</span>
-          <span className="dash-soon">{copy.dashboard.soonBadge}</span>
-        </button>
-
-        <button type="button" disabled className="dash-nav-link" aria-disabled="true">
-          <ArticleIcon />
-          <span>{copy.dashboard.navApplications}</span>
-          <span className="dash-soon">{copy.dashboard.soonBadge}</span>
-        </button>
-
-        <Link
-          href="/profile"
-          aria-current={active === "profile" ? "page" : undefined}
-          className={`dash-nav-link ${active === "profile" ? "dash-nav-link-active" : ""}`}
-        >
-          <UserIcon />
-          <span>{copy.dashboard.navProfile}</span>
-        </Link>
-
-        <button type="button" disabled className="dash-nav-link" aria-disabled="true">
-          <TuneIcon />
-          <span>{copy.dashboard.navSources}</span>
-          <span className="dash-soon">{copy.dashboard.soonBadge}</span>
-        </button>
-
-        <button type="button" disabled className="dash-nav-link" aria-disabled="true">
-          <SettingsIcon />
-          <span>{copy.dashboard.navSettings}</span>
-          <span className="dash-soon">{copy.dashboard.soonBadge}</span>
-        </button>
-
-        <button type="button" disabled className="dash-nav-link" aria-disabled="true">
-          <HelpIcon />
-          <span>{copy.dashboard.navDocs}</span>
-          <span className="dash-soon">{copy.dashboard.soonBadge}</span>
-        </button>
+        {workspaceNav.map(renderItem)}
+        {secondaryNav.map(renderItem)}
       </div>
 
       <div className="dash-sidebar-foot">

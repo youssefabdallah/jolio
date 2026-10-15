@@ -20,9 +20,11 @@ export {
   BellIcon,
   CheckCircleIcon,
   ChevronDownIcon,
+  CloseIcon,
   HelpIcon,
   RefreshIcon,
   TerminalIcon,
   TuneIcon,
+  UnfoldMoreIcon,
 } from "./status";
 export type { IconProps } from "./types";

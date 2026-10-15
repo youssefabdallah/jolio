@@ -20,6 +20,7 @@
   --color-ink: #0f1b2d;     /* primary copy, headings */
   --color-ink-soft: #414752; /* secondary copy (footer, telemetry) */
   --color-muted: #6b7280;   /* metadata, timestamps, table headers */
+  --color-outline: #727783; /* icon strokes: nav, row actions */
 
   /* --- primary action (blue) --- */
   --color-primary: #0a66c2;
@@ -29,8 +30,12 @@
 
   /* --- verification (teal) --- */
   --color-teal: #14b8a6;
+  --color-teal-600: #0d9488; /* mockup "in sync" chrome (teal-600) */
   --color-teal-deep: #0f766e;
   --color-teal-bg: #ccfbf1;
+  --color-teal-50: #f0fdfa;  /* done-step pill fill (teal-50) */
+  --color-teal-300: #5eead4; /* done-step pill border (teal-300) */
+  --color-secondary: #006b5f; /* mockup `secondary`: status dot */
 
   /* --- staged / warning (amber) --- */
   --color-amber-warn: #f59e0b;
@@ -98,7 +103,7 @@
 
   /* --- cards --- */
   .card {
-    @apply bg-card border border-rule rounded-card p-6;
+    @apply bg-card border border-rule rounded-card p-6 shadow-xs;
   }
   .card-title {
     @apply text-h2 font-bold mb-4;
@@ -123,6 +128,10 @@
       bg-card border border-danger text-danger text-body
       hover:bg-danger-bg transition-all duration-150 active:scale-[0.98]
       disabled:opacity-50 disabled:pointer-events-none;
+  }
+  /* Compact buttons for inline + Add row actions (mock style). */
+  .btn-sm {
+    @apply h-8 px-3 text-caption;
   }
 
   /* --- form --- */
@@ -261,7 +270,7 @@
   .dash-avatar-trigger .dash-avatar-btn {
     @apply hover:opacity-100 overflow-hidden;
   }
-  .dash-avatar-img {
+  .avatar-img {
     @apply w-full h-full object-cover;
   }
   .dash-avatar-name {
@@ -341,6 +350,156 @@
     @apply flex items-center gap-4;
   }
 
+  /* --- folio editor shell (Profile route only) ------------------------
+     The Profile mockups ship their own chrome, distinct from the dashboard
+     shell: a 240px paper sidebar whose brand block scrolls with the column,
+     a 56px topbar whose search starts at the content edge, and a footer
+     spanning the full width. Scoped to this route so /dashboard keeps
+     matching its own reference. Control corners here are 4px (the mockup
+     uses Tailwind's `rounded`), so the token is overridden on the scope
+     instead of repeating a radius on every rule. */
+  .folio-shell {
+    --radius-control: 4px;
+    @apply min-h-screen flex bg-paper text-ink;
+  }
+  .folio-sidebar {
+    @apply hidden md:flex w-60 shrink-0 flex-col justify-between bg-card
+      border-r border-rule p-4 sticky top-0 h-screen overflow-y-auto;
+  }
+  .folio-sidebar-mobile {
+    @apply fixed inset-y-0 left-0 z-40 w-60 flex flex-col justify-between
+      bg-card border-r border-rule p-4 overflow-y-auto;
+  }
+  .folio-brand {
+    @apply flex items-center gap-3 px-2 py-2 mb-6;
+  }
+  .folio-brand-mark {
+    @apply w-7 h-7 shrink-0 rounded-control bg-ink text-card font-mono
+      text-caption font-bold flex items-center justify-center;
+  }
+  .folio-brand-name {
+    @apply block text-h2 font-bold text-ink leading-none tracking-tight;
+  }
+  .folio-brand-core {
+    @apply block font-mono text-caption text-muted;
+  }
+  .folio-nav {
+    @apply space-y-1;
+  }
+  .folio-nav-link {
+    @apply w-full flex items-center gap-3 px-3 py-2 text-body text-ink-soft
+      hover:bg-paper hover:text-ink transition-colors duration-150;
+  }
+  .folio-nav-link-active {
+    @apply bg-paper text-primary border-l-2 border-primary font-bold;
+  }
+  .folio-nav-icon {
+    @apply shrink-0 text-outline;
+  }
+  .folio-nav-link-active .folio-nav-icon {
+    @apply text-primary;
+  }
+  .folio-nav-soon {
+    @apply ml-auto shrink-0 font-mono text-caption text-muted bg-paper
+      px-1.5 py-0.5 border border-rule rounded-control;
+  }
+  .folio-sidebar-foot {
+    @apply space-y-3 pt-4 mt-6 border-t border-rule;
+  }
+  .folio-status-chip {
+    @apply px-3 py-2 flex items-center justify-between bg-paper
+      border border-rule rounded-control;
+  }
+  .folio-status-label {
+    @apply flex items-center gap-2 font-mono text-caption text-ink;
+  }
+  .folio-status-dot {
+    @apply w-2 h-2 rounded-full bg-secondary;
+  }
+  .folio-status-value {
+    @apply font-mono text-caption text-muted;
+  }
+  .folio-topbar {
+    @apply sticky top-0 z-30 h-14 flex items-center justify-between gap-3
+      pl-4 pr-4 md:pr-6 bg-card border-b border-rule;
+  }
+  .folio-topbar-lead {
+    @apply flex items-center gap-3 flex-1 min-w-0;
+  }
+  .folio-search {
+    @apply relative w-full max-w-80;
+  }
+  .folio-search-input {
+    @apply w-full h-8 pl-8 pr-12 rounded-control bg-paper border border-rule
+      text-body text-ink placeholder:text-muted outline-none;
+  }
+  .folio-search-icon {
+    @apply absolute inset-y-0 left-0 pl-2.5 flex items-center
+      pointer-events-none text-muted;
+  }
+  .folio-search-kbd {
+    @apply absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none;
+  }
+  .folio-kbd {
+    @apply inline-flex items-center font-mono text-[10px] leading-[15px] text-muted
+      border border-rule rounded-control px-1.5 py-0.5 bg-card;
+  }
+  .folio-actions {
+    @apply flex items-center gap-4;
+  }
+  /* The reference's top bar icons are 18px glyphs sitting at the top of a
+     24px line box, so the 36px hover target is taller than the icon and the
+     icon rides above its centre. Matched here rather than centred so the
+     glyphs and hover boxes land on the same pixels. */
+  .folio-icon-btn {
+    @apply inline-flex h-9 items-start p-1.5 rounded-control text-ink-soft
+      hover:bg-paper transition-colors duration-150;
+  }
+  .folio-actions-rule {
+    @apply h-4 w-px bg-rule;
+  }
+  .folio-user {
+    @apply flex items-center gap-2 pl-1;
+  }
+  .folio-avatar {
+    @apply w-7 h-7 shrink-0 rounded-control bg-ink text-card font-mono
+      text-caption font-bold flex items-center justify-center overflow-hidden;
+  }
+  .folio-user-name {
+    @apply hidden md:block text-body text-ink max-w-32 truncate;
+  }
+  .folio-user-caret {
+    @apply shrink-0 text-outline;
+  }
+  /* main column: 16px gutter from the sidebar, 32px on the right;
+     24px top gap because our topbar is sticky in the column (56px)
+     rather than fixed under it (the mockup's 80px offset). */
+  .folio-content {
+    /* Reference gives <main> min-h-screen, so on short steps the footer sits
+       just below the fold instead of being pinned to the viewport bottom. */
+    @apply flex-1 w-full pt-6 pb-16;
+    min-height: calc(100vh - 3.5rem);
+    padding-left: 1rem;
+    padding-right: 2rem;
+  }
+  .folio-content-inner {
+    @apply w-full max-w-5xl mx-auto space-y-6;
+  }
+  .folio-footer {
+    @apply border-t border-rule bg-paper py-4 text-caption text-muted;
+    padding-left: 1rem;
+    padding-right: 1.5rem;
+  }
+  .folio-footer-inner {
+    @apply flex flex-col sm:flex-row justify-between items-center gap-2;
+  }
+  .folio-footer-links {
+    @apply flex items-center gap-4;
+  }
+  .folio-footer-link {
+    @apply text-muted hover:text-primary transition-colors duration-150;
+  }
+
   /* --- form grids (profile editor) --- */
   .form-grid {
     @apply grid gap-4 md:grid-cols-2;
@@ -359,7 +518,7 @@
       text-body text-ink focus:outline-none focus:border-primary;
   }
   .textarea {
-    @apply w-full px-3 py-2 rounded-control bg-card border border-rule
+    @apply w-full p-3 rounded-control bg-card border border-rule
       text-body text-ink placeholder:text-muted
       focus:outline-none focus:border-primary;
   }
@@ -396,19 +555,49 @@
     @apply font-bold;
   }
 
-  /* --- wizard stepper + completion --- */
-  .stepper {
-    @apply flex flex-wrap gap-2 list-none p-0 m-0;
+  /* --- profile mock alignment: uppercase micro labels, section meta
+     tags, matrix rows, and the live status footer. Scoped so auth and
+     other forms keep the default label style. Desktop hides repeated
+     row labels (column headers serve sighted users; inputs keep their
+     associated labels for assistive tech). */
+  /* Mockup field label: 12px mono at weight 400 with no letter-spacing.
+     `uppercase` only guards title-cased copy — the reference strings are
+     already upper case. */
+  .profile-scope .label {
+    @apply font-mono text-caption text-muted uppercase font-normal;
   }
+  .profile-status-saving {
+    @apply text-primary-deep;
+  }
+  .profile-status-saved {
+    @apply text-teal-deep;
+  }
+
+  /* --- wizard progress block: white card holding the step pills
+     and the completion bar; pills stretch to fill the block width.
+     `shadow-xs` is v4's name for the mockup's `shadow-sm`. */
+  .wizard-progress {
+    @apply bg-card border border-rule rounded-card p-4 shadow-xs space-y-3.5;
+  }
+  .wizard-progress-meta {
+    @apply flex items-center justify-between font-mono text-caption text-muted;
+  }
+  .wizard-progress-percent {
+    @apply font-semibold text-primary;
+  }
+  .stepper {
+    @apply grid gap-2 list-none p-0 m-0 grid-cols-2 sm:grid-cols-4 lg:grid-cols-7;
+  }
+  /* 12px/16px mono label: the mockup pill is 34px tall (8+16+8+border). */
   .stepper-item {
-    @apply flex items-center gap-2 h-9 px-3 rounded-control border border-rule
-      bg-card text-caption text-muted font-mono transition-colors duration-200;
+    @apply flex min-w-0 items-center justify-center gap-2 py-2 px-3 rounded-card border border-rule
+      bg-card/70 text-[12px] leading-4 text-muted font-mono transition-all duration-150;
   }
   .stepper-item-active {
-    @apply border-primary text-primary-deep font-bold;
+    @apply bg-primary border-primary text-white font-semibold shadow-xs;
   }
   .stepper-item-done {
-    @apply text-teal-deep border-teal;
+    @apply bg-teal-50 text-teal-deep border-teal-300;
   }
   .stepper-icon {
     @apply inline-flex shrink-0;
@@ -443,10 +632,10 @@
     }
   }
   .completion-track {
-    @apply w-full h-2 rounded-full bg-paper border border-rule overflow-hidden;
+    @apply w-full h-1.5 rounded-full bg-rule/60 overflow-hidden;
   }
   .completion-fill {
-    @apply h-full transition-all duration-300;
+    @apply h-full bg-primary transition-all duration-300;
   }
   .completion-fill-red {
     @apply h-full bg-danger transition-all duration-300;
@@ -455,7 +644,237 @@
     @apply h-full bg-amber-warn transition-all duration-300;
   }
   .completion-fill-green {
-    @apply h-full bg-teal transition-all duration-300;
+    @apply h-full bg-primary transition-all duration-300;
+  }
+
+  /* --- profile wizard alignment with Stitch mockup --- */
+  .btn-teal {
+    @apply inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-control
+      bg-teal-600 text-white text-body
+      hover:bg-teal-deep transition-all duration-150 active:scale-[0.98]
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+  /* Mockup action-bar buttons: the outline pair is tighter (px-3.5) and
+     every wizard button spaces its icon at 6px. */
+  .btn-wizard {
+    @apply gap-1.5;
+  }
+  .btn-wizard-outline {
+    @apply gap-1.5 px-3.5 disabled:opacity-40;
+  }
+  /* The reference inherits Tailwind's form reset on every <select>: the system
+     arrow is suppressed and a thin chevron is painted as a background image.
+     Reproduced here so the caret's weight and inset match, and the control's
+     intrinsic width is the reference's rather than the browser default. */
+  .select-arrow {
+    @apply appearance-none bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: calc(100% - 8px) 50%;
+    background-size: 18px 18px;
+  }
+  .select-sm {
+    @apply h-7 px-2 py-0 text-[12px] leading-6 font-mono bg-card border border-rule rounded-control
+      text-ink focus:outline-none focus:border-primary;
+  }
+  .card-head-title {
+    @apply flex items-center justify-between gap-3 pb-4 border-b border-rule;
+  }
+  .card-meta-pill {
+    @apply shrink-0 font-mono text-caption text-muted bg-paper px-2.5 py-1 border border-rule rounded-control;
+  }
+  .card-meta-pill-ready {
+    @apply shrink-0 inline-flex items-center gap-1 font-mono text-caption text-teal-deep bg-teal-50 border border-teal-300 px-2.5 py-1 rounded-control;
+  }
+  .card-desc {
+    @apply text-caption text-muted;
+  }
+  .skill-toolbar {
+    @apply p-4 bg-paper border border-rule rounded-card space-y-3;
+  }
+  .skill-toolbar-title {
+    @apply font-mono text-caption text-muted uppercase;
+  }
+  /* Toolbar field labels sit one size below the form labels used elsewhere
+     in the wizard (reference: text-[10px]/15px). */
+  .skill-toolbar .label {
+    @apply text-[10px] leading-[15px];
+  }
+  /* A single trailing glyph needs less clearance than the country field's
+     pair (see .adorned-trailing below). */
+  .skill-toolbar .adorned-trailing input.input {
+    @apply pr-8;
+  }
+  .skills-hint {
+    @apply font-mono text-caption text-muted;
+  }
+  .add-dashed {
+    @apply inline-flex items-center gap-1.5 h-8 px-3 rounded-control border border-dashed border-rule
+      text-caption text-ink-soft hover:bg-paper transition-colors duration-150;
+  }
+  .lang-code {
+    @apply font-mono text-caption text-muted w-6 shrink-0;
+  }
+  .lang-badge {
+    @apply font-mono text-caption bg-paper px-2 py-0.5 border border-rule rounded-control text-muted whitespace-nowrap;
+  }
+  .review-section {
+    @apply border border-rule rounded-card p-4 bg-paper;
+  }
+  .review-section-head {
+    @apply flex items-center justify-between gap-2 pb-2 border-b border-rule/60 mb-3;
+  }
+  .review-section-title {
+    @apply text-[14px] leading-5 font-semibold text-ink;
+  }
+  .review-edit {
+    @apply inline-flex items-center gap-1 font-mono text-caption leading-4 text-primary hover:underline;
+  }
+  /* Reference labels sit on the inherited 16px line of the review bodies. */
+  .review-label {
+    @apply block font-mono text-[10px] leading-4 text-muted;
+  }
+  /* Reference review bodies run on the 12/16 ramp (text-xs), not 12/18. */
+  .review-body {
+    @apply text-caption leading-4;
+  }
+  .review-pill {
+    @apply bg-card border border-rule px-2.5 py-1 rounded-control font-mono text-[11px] leading-4 text-ink;
+  }
+  .wizard-actionbar {
+    @apply mt-8 pt-5 border-t border-rule flex flex-col sm:flex-row sm:items-center justify-between gap-4;
+  }
+  .wizard-buffered {
+    @apply flex items-center gap-2 font-mono text-caption text-muted;
+  }
+
+  /* --- inline-edit rows (skills table, languages): inputs look like
+     static text at rest (transparent, borderless) and show affordances
+     on hover/focus. Labels stay associated for assistive tech but are
+     visually hidden — column headers serve sighted users. */
+  .inline-row label.label {
+    @apply sr-only;
+  }
+  /* Inline row editors read as the reference's static text at rest, so the
+     box, fill and padding are stripped; hover / focus / invalid states use a
+     ring rather than a border so nothing shifts when the affordance appears. */
+  .inline-row input.input {
+    @apply h-auto px-0 py-0 border-0 rounded-none bg-transparent
+      hover:ring-1 hover:ring-rule
+      focus:ring-1 focus:ring-primary;
+  }
+  /* The group cell's editor carries its text's 12/18 line box so the row
+     centres the glyphs rather than the taller inherited body strut. */
+  .inline-row .cell-mono {
+    @apply leading-[18px];
+  }
+  .inline-row .cell-mono input.input {
+    @apply font-mono text-caption text-muted;
+  }
+  .inline-row input.input[aria-invalid="true"] {
+    @apply ring-1 ring-danger;
+  }
+  /* Mockup matrix geometry: 25% / 50% / 20% / 48px columns set cell by
+     cell (no grid gap), each cell carrying 16px of padding — that is what
+     lands the three text columns on the reference x positions. Row cells
+     are borderless inline inputs, so their own horizontal padding is
+     dropped and the cell supplies the single 16px inset. */
+  .skills-table {
+    @apply border border-rule rounded-control overflow-hidden;
+  }
+  .skills-head {
+    @apply grid items-center py-2.5 bg-paper border-b border-rule
+      font-mono text-[12px] leading-[18px] text-muted uppercase
+      grid-cols-2 sm:grid-cols-[25fr_50fr_20fr_3rem];
+  }
+  .skills-head > * {
+    @apply px-4;
+  }
+  .skills-head > *:last-child {
+    @apply text-right;
+  }
+  .skills-body {
+    @apply divide-y divide-rule bg-card;
+  }
+  .skills-row {
+    @apply grid items-center py-2.5
+      grid-cols-1 sm:grid-cols-[25fr_50fr_20fr_3rem]
+      hover:bg-paper transition-colors duration-150;
+  }
+  .skills-row > * {
+    @apply px-4;
+  }
+  .skills-row-remove {
+    @apply flex justify-end;
+  }
+  /* Row/entry removal: mockup draws a bare outline-coloured glyph with a
+     danger hover, no button chrome. */
+  .row-remove {
+    @apply inline-flex items-center justify-center text-outline
+      hover:text-danger transition-colors duration-150
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary;
+  }
+
+  /* --- compact month pickers for the experience date row. Native
+     <input type="month"> adds a calendar glyph, so allow a little more
+     width than a plain text field. */
+  .month-input {
+    @apply h-8 w-28 px-2 rounded-control bg-card border border-rule
+      text-body text-ink focus:outline-none focus:border-primary;
+  }
+  .month-input:disabled {
+    @apply bg-paper text-muted cursor-not-allowed;
+  }
+  .month-input[aria-invalid="true"] {
+    @apply border-danger;
+  }
+
+  /* --- expanded entry cards (experience, education): always open,
+     matching the reference; removal stays as a quiet corner action. */
+  .entry-card {
+    @apply relative p-4 border border-rule rounded-card bg-card space-y-4;
+  }
+  /* The mockup's experience/education cards show no remove affordance at
+     rest. It stays in the DOM (focusable, screen-reader reachable) and
+     fades in on hover or keyboard focus, so the resting frame matches the
+     reference without removing the capability. */
+  .entry-remove {
+    @apply absolute top-2 right-2 opacity-0 transition-opacity duration-150;
+  }
+  .entry-card:hover .entry-remove,
+  .entry-card:focus-within .entry-remove {
+    @apply opacity-100;
+  }
+  .phone-join #country-code-label {
+    @apply sr-only;
+  }
+  .phone-join {
+    @apply flex items-stretch;
+  }
+  .phone-join .phone-code button.select {
+    @apply rounded-r-none bg-paper font-mono h-9 px-2.5;
+  }
+  .phone-join input.phone-national {
+    @apply rounded-l-none border-l-0;
+  }
+
+  /* --- input adornments (shared Autocomplete): flag/chevron icons
+     pinned inside the field edges. Padding shifts win over .input
+     through higher specificity — no !important overrides. */
+  .adorned-leading input.input {
+    @apply pl-9;
+  }
+  .adorned-trailing input.input {
+    @apply pr-14;
+  }
+  .adorn-lead {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 flex items-center text-body pointer-events-none;
+  }
+  .adorn-trail {
+    @apply absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-muted;
+  }
+  .adorn-clear {
+    @apply inline-flex items-center justify-center w-5 h-5 rounded-full hover:text-ink hover:bg-paper
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary;
   }
 
   /* --- lists --- */
@@ -464,3 +883,6 @@
       hover:bg-paper transition-colors duration-150;
   }
 }
+
+
+

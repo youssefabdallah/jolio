@@ -14,7 +14,6 @@ import {
   type ProfileExperience,
   type ProfileInput,
 } from "@/lib/api/profile";
-import { DashboardShell } from "@/components/ui/layout";
 import { Button, FormError } from "@/components/ui";
 import {
   ArrowLeftIcon,
@@ -22,8 +21,10 @@ import {
   ArticleIcon,
   BriefcaseIcon,
   CheckCircleIcon,
+  EyeIcon,
   GlobeIcon,
   GraduationCapIcon,
+  PencilIcon,
   RefreshIcon,
   SaveIcon,
   TuneIcon,
@@ -34,14 +35,14 @@ import { ContactSection } from "./ContactSection";
 import { HeadlineSection } from "./HeadlineSection";
 import {
   EducationSection,
-  ExpandableItem,
   ExperienceSection,
   LanguagesSection,
   SkillsSection,
   presentDateErrors,
 } from "./Sections";
 import StepIndicator, { type WizardStep } from "./StepIndicator";
-import { completionTone, estimateCompletion } from "../completion";
+import ProfileShell from "./ProfileShell";
+import { estimateCompletion } from "../completion";
 import { useRouter } from "next/navigation";
 
 const STEPS: WizardStep[] = [
@@ -52,6 +53,16 @@ const STEPS: WizardStep[] = [
   { value: "education", label: copy.profile.stepEducation, icon: GraduationCapIcon },
   { value: "languages", label: copy.profile.stepLanguages, icon: GlobeIcon },
   { value: "review", label: copy.profile.stepReview, icon: CheckCircleIcon },
+];
+
+const STEP_TITLES: string[] = [
+  copy.profile.stepTitleContact,
+  copy.profile.stepTitleHeadline,
+  copy.profile.stepTitleSkills,
+  copy.profile.stepTitleExperience,
+  copy.profile.stepTitleEducation,
+  copy.profile.stepTitleLanguages,
+  copy.profile.stepTitleReview,
 ];
 
 /** Error prefixes belonging to each step (review owns none). */
@@ -106,15 +117,41 @@ function stepIndexFor(stored: string | null | undefined): number {
   return found >= 0 ? found : 0;
 }
 
-/** Read-only label/value row for the review step (module level: defining
- *  components during render would reset their state on every render). */
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 py-1">
-      <dt className="text-caption text-muted shrink-0">{label}</dt>
-      <dd className="text-body text-ink text-right break-words min-w-0">{value}</dd>
-    </div>
-  );
+/** Skill pill tone for the review step (mockup: expert blue, advanced teal). */
+function skillTone(level: string): string {
+  const normalized = level.toLowerCase();
+  if (normalized === "expert") {
+    return "text-primary font-bold";
+  }
+  if (normalized === "advanced") {
+    return "text-teal-deep font-bold";
+  }
+  return "text-muted font-bold";
+}
+
+/** Review-step language level in reference wording (Native, C2 Proficient…). */
+function langShort(level: string): string {
+  switch (level.toLowerCase()) {
+    case "native":
+      return copy.profile.langShortNative;
+    case "c2":
+      return copy.profile.langShortC2;
+    case "c1":
+      return copy.profile.langShortC1;
+    case "b2":
+      return copy.profile.langShortB2;
+    case "b1":
+      return copy.profile.langShortB1;
+    case "a2":
+      return copy.profile.langShortA2;
+    default:
+      return copy.profile.langShortA1;
+  }
+}
+
+/** Skill level with a leading capital (Expert, Advanced…) as in the reference. */
+function capLevel(level: string): string {
+  return level.charAt(0).toUpperCase() + level.slice(1);
 }
 
 /**
@@ -387,45 +424,66 @@ export default function ProfileScreen({
 
   const current = STEPS[step].value;
   const score = estimateCompletion(input);
-  const tone = completionTone(score);
+  const progressTitle = STEP_TITLES[step] ?? "";
+  // The percentage mirrors real completeness (weighted), not step
+  // position, so it only moves when a field is filled or missing.
+  const percentText = copy.profile.percentCompleted.replace("{percent}", String(score));
+
+  function onPreview() {
+    if (saving || step === STEPS.length - 1) {
+      return;
+    }
+    void jumpTo(STEPS.length - 1);
+  }
 
   return (
-    <DashboardShell user={user} active="profile">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <ProfileShell user={user} active="profile">
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-rule">
         <div>
           <h1 className="text-h1 font-bold text-ink">{copy.profile.title}</h1>
-          <p className="text-body text-muted mt-1">{copy.profile.subtitle}</p>
+          <p className="text-body text-muted mt-0.5">{copy.profile.subtitle}</p>
         </div>
-      </div>
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" onClick={onPreview} disabled={saving}>
+            <EyeIcon size={16} />
+            {copy.profile.previewResume}
+          </Button>
+        </div>
+      </section>
 
-      <StepIndicator steps={STEPS} current={step} navigable={score === 100} onSelect={(index) => void jumpTo(index)} />
+      <div className="wizard-progress">
+        <StepIndicator steps={STEPS} current={step} navigable={score === 100} onSelect={(index) => void jumpTo(index)} />
 
-      <section aria-label={copy.profile.completionLabel}>
-        <div className="flex items-baseline justify-between gap-2">
-          <p className="text-caption text-muted">{copy.profile.completionLabel}</p>
-          <p className="font-mono text-caption text-ink">{score}%</p>
+        <section aria-label={copy.profile.completionLabel} className="pt-1">
+        <div className="wizard-progress-meta mb-1.5">
+          <span>
+            {copy.profile.stepLabel} {step + 1} {copy.profile.ofLabel} {STEPS.length} • {progressTitle}
+          </span>
+          <span className="wizard-progress-percent">{percentText}</span>
         </div>
         <div
-          className="completion-track mt-1"
+          className="completion-track"
           role="progressbar"
           aria-valuenow={score}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label={copy.profile.completionLabel}
         >
-          <div className={`completion-fill-${tone}`} style={{ width: `${score}%` }} />
+          <div className="completion-fill" style={{ width: `${score}%` }} />
         </div>
-      </section>
+        </section>
+      </div>
 
       <FormError message={formError} />
-      {saved ? <p className="success-alert">{copy.profile.saved}</p> : null}
 
-      <div key={current} className="step-enter">
+      <div className="card">
+      <div key={current} className="step-enter profile-scope">
       {current === "contact" ? (
         <ContactSection
           value={input.contact}
           errors={fieldErrors}
           onChange={(contact) => patch({ contact }, "contact")}
+          meta={copy.profile.metaPublicRecord}
         />
       ) : null}
       {current === "headline" ? (
@@ -435,6 +493,7 @@ export default function ProfileScreen({
           errors={fieldErrors}
           onHeadline={(headline) => patch({ headline }, "headline")}
           onSummary={(summary) => patch({ summary }, "summary")}
+          meta={copy.profile.metaAtsSync}
         />
       ) : null}
       {current === "skills" ? (
@@ -444,6 +503,7 @@ export default function ProfileScreen({
           expandOnError={hasSectionError("skills")}
           onChange={(skills) => patch({ skills }, "skills")}
           onAdd={() => void requestAdd("skills")}
+          meta={copy.profile.metaActiveClusters.replace("{count}", String(input.skills?.length ?? 0))}
         />
       ) : null}
       {current === "experience" ? (
@@ -453,6 +513,7 @@ export default function ProfileScreen({
           expandOnError={hasSectionError("experience")}
           onChange={(experience) => patch({ experience }, "experience")}
           onAdd={() => void requestAdd("experience")}
+          meta={copy.profile.metaPositionsLogged.replace("{count}", String(input.experience?.length ?? 0))}
         />
       ) : null}
       {current === "education" ? (
@@ -462,6 +523,7 @@ export default function ProfileScreen({
           expandOnError={hasSectionError("education")}
           onChange={(education) => patch({ education }, "education")}
           onAdd={() => void requestAdd("education")}
+          meta={copy.profile.metaAcademic}
         />
       ) : null}
       {current === "languages" ? (
@@ -471,190 +533,277 @@ export default function ProfileScreen({
           expandOnError={hasSectionError("languages")}
           onChange={(languages) => patch({ languages }, "languages")}
           onAdd={() => void requestAdd("languages")}
+          meta={copy.profile.metaCefr}
         />
       ) : null}
       {current === "review" ? (
-        <section className="card" aria-labelledby="profile-review">
-          <h2 id="profile-review" className="card-title">
-            {copy.profile.reviewTitle}
-          </h2>
-          <p className="text-body text-muted">{copy.profile.reviewBody}</p>
-          <div className="mt-4 form-row">
-            <ExpandableItem
-              summary={copy.profile.sectionContact}
-              index={0}
-              section="review"
-              defaultOpen={false}
-              onEdit={() => setStep(0)}
-            >
-              <dl>
-                <DetailRow label={copy.profile.fullNameLabel} value={input.contact.full_name} />
-                {input.contact.email ? (
-                  <DetailRow label={copy.profile.emailLabel} value={input.contact.email} />
-                ) : null}
-                {input.contact.phone ? (
-                  <DetailRow label={copy.profile.phoneLabel} value={input.contact.phone} />
-                ) : null}
-                {input.contact.city ? (
-                  <DetailRow label={copy.profile.cityLabel} value={input.contact.city} />
-                ) : null}
-                {input.contact.country ? (
-                  <DetailRow label={copy.profile.countryLabel} value={input.contact.country} />
-                ) : null}
-                {input.contact.website ? (
-                  <DetailRow label={copy.profile.websiteLabel} value={input.contact.website} />
-                ) : null}
-              </dl>
-            </ExpandableItem>
-
-            <ExpandableItem
-              summary={copy.profile.sectionHeadline}
-              index={1}
-              section="review"
-              defaultOpen={false}
-              onEdit={() => setStep(1)}
-            >
-              {input.headline ? <p className="text-body font-bold text-ink">{input.headline}</p> : null}
-              {input.summary ? <p className="text-body text-muted mt-1">{input.summary}</p> : null}
-              {!input.headline && !input.summary ? (
+        <section aria-labelledby="profile-review" className="space-y-6">
+          <div className="card-head-title">
+            <div>
+              <h2 id="profile-review" className="text-h2 font-bold text-ink">
+                7. {copy.profile.stepTitleReview}
+              </h2>
+              <p className="card-desc">{copy.profile.descReview}</p>
+            </div>
+            <span className="card-meta-pill-ready">
+              <CheckCircleIcon size={14} />
+              <span>{copy.profile.readyToSync}</span>
+            </span>
+          </div>
+          <div className="space-y-4">
+            <div className="review-section">
+              <div className="review-section-head">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary" aria-hidden="true">
+                    <UserIcon size={18} />
+                  </span>
+                  <span className="review-section-title">{copy.profile.stepTitleContact}</span>
+                </div>
+                <button type="button" onClick={() => setStep(0)} className="review-edit">
+                  <PencilIcon size={14} />
+                  {copy.profile.editSection}
+                </button>
+              </div>
+              {(input.contact.full_name || input.contact.email || input.contact.phone || input.contact.city || input.contact.country || input.contact.website) ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 review-body">
+                  <div>
+                    <span className="review-label">{copy.profile.reviewNameLabel.toUpperCase()}</span>
+                    <span className="font-medium text-ink">{input.contact.full_name || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="review-label">{copy.profile.reviewEmailLabel.toUpperCase()}</span>
+                    <span className="font-medium text-ink break-all">{input.contact.email || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="review-label">{copy.profile.phoneLabel.toUpperCase()}</span>
+                    <span className="font-medium text-ink">{input.contact.phone || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="review-label">{copy.profile.reviewLocationLabel.toUpperCase()}</span>
+                    <span className="font-medium text-ink">
+                      {[input.contact.city, input.contact.country].filter(Boolean).join(", ") || "—"}
+                    </span>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span className="review-label">{copy.profile.websiteLabel.toUpperCase()}</span>
+                    <span className="font-medium text-primary font-mono break-all">{input.contact.website || "—"}</span>
+                  </div>
+                </div>
+              ) : (
                 <p className="text-body text-muted">{copy.profile.reviewEmpty}</p>
-              ) : null}
-            </ExpandableItem>
-
-            <ExpandableItem
-              summary={copy.profile.sectionSkills}
-              meta={String(input.skills?.length ?? 0)}
-              index={2}
-              section="review"
-              defaultOpen={false}
-              onEdit={() => setStep(2)}
-            >
+              )}
+            </div>
+            <div className="review-section">
+              <div className="review-section-head">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary" aria-hidden="true">
+                    <ArticleIcon size={18} />
+                  </span>
+                  <span className="review-section-title">{copy.profile.stepTitleHeadline}</span>
+                </div>
+                <button type="button" onClick={() => setStep(1)} className="review-edit">
+                  <PencilIcon size={14} />
+                  {copy.profile.editSection}
+                </button>
+              </div>
+              {input.headline || input.summary ? (
+                <div className="space-y-2 review-body">
+                  {input.headline ? (
+                    <div>
+                      <span className="review-label">{copy.profile.headlineLabel.toUpperCase()}</span>
+                      <span className="font-medium text-ink">{input.headline}</span>
+                    </div>
+                  ) : null}
+                  {input.summary ? (
+                    <div>
+                      <span className="review-label">{copy.profile.summaryLabel.toUpperCase()}</span>
+                      <p className="text-muted leading-relaxed">{input.summary}</p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-body text-muted">{copy.profile.reviewEmpty}</p>
+              )}
+            </div>
+            <div className="review-section">
+              <div className="review-section-head">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary" aria-hidden="true">
+                    <TuneIcon size={18} />
+                  </span>
+                  <span className="review-section-title">
+                    {copy.profile.reviewSkillsTitle.replace("{count}", String((input.skills ?? []).length))}
+                  </span>
+                </div>
+                <button type="button" onClick={() => setStep(2)} className="review-edit">
+                  <PencilIcon size={14} />
+                  {copy.profile.editSection}
+                </button>
+              </div>
               {(input.skills ?? []).length === 0 ? (
                 <p className="text-body text-muted">{copy.profile.reviewEmpty}</p>
               ) : (
-                <ul>
+                <div className="flex flex-wrap gap-2">
                   {(input.skills ?? []).map((skill, index) => (
-                    <li key={index} className="row-item !px-0">
-                      <span className="text-body text-ink">
-                        {skill.group} — {skill.name}
-                      </span>
-                      <span className="ml-auto font-mono text-caption text-muted pl-3">{skill.level}</span>
-                    </li>
+                    <span key={index} className="review-pill">
+                      {skill.name || skill.group} <span className={skillTone(skill.level)}>• {capLevel(skill.level)}</span>
+                    </span>
                   ))}
-                </ul>
+                </div>
               )}
-            </ExpandableItem>
-
-            <ExpandableItem
-              summary={copy.profile.sectionExperience}
-              meta={String(input.experience?.length ?? 0)}
-              index={3}
-              section="review"
-              defaultOpen={false}
-              onEdit={() => setStep(3)}
-            >
+            </div>
+            <div className="review-section">
+              <div className="review-section-head">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary" aria-hidden="true">
+                    <BriefcaseIcon size={18} />
+                  </span>
+                  <span className="review-section-title">
+                    {copy.profile.reviewWorkTitle.replace("{count}", String((input.experience ?? []).length))}
+                  </span>
+                </div>
+                <button type="button" onClick={() => setStep(3)} className="review-edit">
+                  <PencilIcon size={14} />
+                  {copy.profile.editSection}
+                </button>
+              </div>
               {(input.experience ?? []).length === 0 ? (
                 <p className="text-body text-muted">{copy.profile.reviewEmpty}</p>
               ) : (
-                (input.experience ?? []).map((entry, index) => (
-                  <article key={index} className={index > 0 ? "border-t border-rule mt-3 pt-3" : undefined}>
-                    <p className="text-body font-bold text-ink">
-                      {entry.role} · {entry.company}
-                    </p>
-                    <p className="font-mono text-caption text-muted mt-0.5">
-                      {[entry.location, entry.start_date, entry.end_date ?? copy.profile.presentLabel]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                    {(entry.bullets ?? []).length > 0 ? (
-                      <ul className="mt-1.5 list-disc pl-5 text-body text-muted">
-                        {(entry.bullets ?? []).map((bullet, bulletIndex) => (
-                          <li key={bulletIndex}>{bullet}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </article>
-                ))
+                <div className="space-y-2 review-body">
+                  {(input.experience ?? []).map((entry, index) => (
+                    <div key={index} className="flex justify-between items-start gap-3">
+                      <div>
+                        <span className="font-semibold text-ink">{entry.role}</span>
+                        {entry.company ? <span className="text-muted"> — {entry.company}</span> : null}
+                      </div>
+                      <span className="font-mono text-caption text-muted whitespace-nowrap">
+                        {[entry.start_date, entry.end_date ?? copy.profile.presentLabel].filter(Boolean).join(" — ")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
-            </ExpandableItem>
-
-            <ExpandableItem
-              summary={copy.profile.sectionEducation}
-              meta={String(input.education?.length ?? 0)}
-              index={4}
-              section="review"
-              defaultOpen={false}
-              onEdit={() => setStep(4)}
-            >
+            </div>
+            <div className="review-section">
+              <div className="review-section-head">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary" aria-hidden="true">
+                    <GraduationCapIcon size={18} />
+                  </span>
+                  <span className="review-section-title">{copy.profile.reviewEduTitle}</span>
+                </div>
+                <button type="button" onClick={() => setStep(4)} className="review-edit">
+                  <PencilIcon size={14} />
+                  {copy.profile.editSection}
+                </button>
+              </div>
               {(input.education ?? []).length === 0 ? (
                 <p className="text-body text-muted">{copy.profile.reviewEmpty}</p>
               ) : (
-                (input.education ?? []).map((entry, index) => (
-                  <article key={index} className={index > 0 ? "border-t border-rule mt-3 pt-3" : undefined}>
-                    <p className="text-body font-bold text-ink">
-                      {entry.degree}, {entry.institution}
-                    </p>
-                    <p className="font-mono text-caption text-muted mt-0.5">
-                      {[entry.field, entry.start_year, entry.end_year].filter(Boolean).join(" · ")}
-                    </p>
-                  </article>
-                ))
+                <div className="space-y-2 review-body">
+                  {(input.education ?? []).map((entry, index) => (
+                    <div key={index} className="flex justify-between items-start gap-3">
+                      <div>
+                        <span className="font-semibold text-ink">{entry.degree || "—"}</span>
+                        {entry.institution ? <span className="text-muted"> — {entry.institution}</span> : null}
+                        {entry.field ? <span className="block text-muted text-[11px]">{entry.field}</span> : null}
+                      </div>
+                      <span className="font-mono text-caption text-muted whitespace-nowrap">
+                        {[entry.start_year, entry.end_year].filter(Boolean).join(" — ")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
-            </ExpandableItem>
-
-            <ExpandableItem
-              summary={copy.profile.sectionLanguages}
-              meta={String(input.languages?.length ?? 0)}
-              index={5}
-              section="review"
-              defaultOpen={false}
-              onEdit={() => setStep(5)}
-            >
+            </div>
+            <div className="review-section">
+              <div className="review-section-head">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary" aria-hidden="true">
+                    <GlobeIcon size={18} />
+                  </span>
+                  <span className="review-section-title">{copy.profile.stepTitleLanguages}</span>
+                </div>
+                <button type="button" onClick={() => setStep(5)} className="review-edit">
+                  <PencilIcon size={14} />
+                  {copy.profile.editSection}
+                </button>
+              </div>
               {(input.languages ?? []).length === 0 ? (
                 <p className="text-body text-muted">{copy.profile.reviewEmpty}</p>
               ) : (
-                <ul>
+                <div className="flex flex-wrap gap-3 review-body">
                   {(input.languages ?? []).map((entry, index) => (
-                    <li key={index} className="row-item !px-0">
-                      <span className="text-body text-ink">{entry.language}</span>
-                      <span className="ml-auto font-mono text-caption text-muted pl-3">{entry.level}</span>
-                    </li>
+                    <span key={index} className="font-mono text-[11px] leading-4">
+                      <strong className="text-ink">{entry.language}:</strong> {langShort(entry.level)}
+                    </span>
                   ))}
-                </ul>
+                </div>
               )}
-            </ExpandableItem>
-          </div>
-          <div className="pt-4">
-            <Button onClick={onSaveAndGo} disabled={saving}>
-              <CheckCircleIcon size={16} />
-              {saving ? copy.profile.saving : copy.profile.saveAndGoDashboard}
-            </Button>
+            </div>
           </div>
         </section>
       ) : null}
       </div>
 
-      <div className="form-actions">
-        {step > 0 ? (
-          <Button variant="secondary" onClick={onBack} disabled={saving}>
+      <div className="wizard-actionbar">
+        <p
+          className={`wizard-buffered ${saving ? "profile-status-saving" : saved ? "profile-status-saved" : ""}`}
+          aria-live="polite"
+        >
+          <span className={saving ? "text-primary" : "text-teal-600"} aria-hidden="true">
+            <CheckCircleIcon size={16} />
+          </span>
+          <span>{saving ? copy.profile.saving : saved ? copy.profile.saved : copy.profile.bufferedMessage}</span>
+        </p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            className="btn-wizard-outline"
+            onClick={onBack}
+            disabled={saving || step === 0}
+          >
             <ArrowLeftIcon size={16} />
             {copy.profile.back}
           </Button>
-        ) : null}
-        {step < STEPS.length - 1 ? (
-          <>
-            <Button onClick={onNext} disabled={saving}>
-              {saving ? copy.profile.saving : copy.profile.next}
-              {!saving ? <ArrowRightIcon size={16} /> : null}
-            </Button>
-            <Button variant="secondary" onClick={onSaveStay} disabled={saving}>
-              <SaveIcon size={16} />
-              {saving ? copy.profile.saving : copy.profile.save}
-            </Button>
-          </>
-        ) : null}
+          {step < STEPS.length - 1 ? (
+            <>
+              <Button
+                variant="secondary"
+                className="btn-wizard-outline"
+                onClick={onSaveStay}
+                disabled={saving}
+              >
+                <SaveIcon size={16} />
+                {saving ? copy.profile.saving : copy.profile.saveDraft}
+              </Button>
+              <Button className="btn-wizard" onClick={onNext} disabled={saving}>
+                {saving ? copy.profile.saving : copy.profile.next}
+                {!saving ? <ArrowRightIcon size={16} /> : null}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                className="btn-wizard-outline"
+                onClick={onSaveStay}
+                disabled={saving}
+              >
+                <SaveIcon size={16} />
+                {saving ? copy.profile.saving : copy.profile.saveDraft}
+              </Button>
+              <button type="button" onClick={onSaveAndGo} disabled={saving} className="btn-teal btn-wizard">
+                <CheckCircleIcon size={16} />
+                {saving ? copy.profile.saving : copy.profile.saveAndGoDashboard}
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </DashboardShell>
+      </div>
+    </ProfileShell>
   );
 }
 

@@ -24,6 +24,10 @@ interface AutocompleteProps {
   emptyText: string;
   /** Strict-mode notice when blurred text matches no option. */
   invalidText?: string;
+  /** Element pinned inside the input's left edge (field variant only). */
+  leading?: ReactNode;
+  /** Element pinned inside the input's right edge (field variant only). */
+  trailing?: ReactNode;
   /** True keeps unknown text on blur (skills); false reverts (country). */
   allowCustom?: boolean;
   /**
@@ -55,6 +59,8 @@ export default function Autocomplete({
   error,
   emptyText,
   invalidText,
+  leading,
+  trailing,
   allowCustom = true,
   trigger,
   searchLabel,
@@ -270,26 +276,33 @@ export default function Autocomplete({
   }
 
   const shown = error ?? notice;
+  const adorned = leading !== undefined || trailing !== undefined;
   return (
     <div ref={rootRef} className="relative">
       <label className="label" htmlFor={id}>
         {label}
       </label>
-      <input
-        id={id}
-        name={name}
-        type="text"
-        role="combobox"
-        aria-expanded={open}
-        aria-controls={listId}
-        aria-autocomplete="list"
-        aria-activedescendant={`${listId}-${active}`}
-        aria-describedby={shown ? `${id}-error` : undefined}
-        aria-invalid={shown ? true : undefined}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        className="input"
-        value={text}
+      <div className={`relative${adorned ? " adorned" : ""}${leading ? " adorned-leading" : ""}${trailing ? " adorned-trailing" : ""}`}>
+        {leading ? (
+          <span aria-hidden="true" className="adorn-lead">
+            {leading}
+          </span>
+        ) : null}
+        <input
+          id={id}
+          name={name}
+          type="text"
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={listId}
+          aria-autocomplete="list"
+          aria-activedescendant={`${listId}-${active}`}
+          aria-describedby={shown ? `${id}-error` : undefined}
+          aria-invalid={shown ? true : undefined}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          className="input"
+          value={text}
         onChange={(event) => {
           setText(event.target.value);
           setNotice(null);
@@ -302,7 +315,9 @@ export default function Autocomplete({
           setOpen(false);
         }}
         onKeyDown={(event) => onKey(event, "field")}
-      />
+        />
+        {trailing ? <span className="adorn-trail">{trailing}</span> : null}
+      </div>
       {open ? (
         <ul
           id={listId}

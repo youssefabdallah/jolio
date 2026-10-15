@@ -10,20 +10,27 @@ export interface ContactSectionProps {
   value: ProfileContact;
   errors: Record<string, string>;
   onChange: (value: ProfileContact) => void;
+  meta?: string;
 }
 
 /** Section 1: contact details in a two-column grid. */
-export function ContactSection({ value, errors, onChange }: ContactSectionProps) {
+export function ContactSection({ value, errors, onChange, meta }: ContactSectionProps) {
   function set(key: keyof ProfileContact, next: string) {
     onChange({ ...value, [key]: next });
   }
 
   return (
-    <section className="card" aria-labelledby="profile-contact">
-      <h2 id="profile-contact" className="card-title">
-        {copy.profile.sectionContact}
-      </h2>
-      {errors.contact ? <p className="field-alert mb-4">{errors.contact}</p> : null}
+    <section aria-labelledby="profile-contact" className="space-y-6">
+      <div className="card-head-title">
+        <div>
+          <h2 id="profile-contact" className="text-h2 font-bold text-ink">
+            {copy.profile.sectionContact}
+          </h2>
+          <p className="card-desc">{copy.profile.descContact}</p>
+        </div>
+        {meta ? <span className="card-meta-pill">{meta}</span> : null}
+      </div>
+      {errors.contact ? <p className="field-alert">{errors.contact}</p> : null}
       <div className="form-grid">
         <TextInput
           id="profile-full-name"
@@ -66,7 +73,7 @@ export function ContactSection({ value, errors, onChange }: ContactSectionProps)
           id="profile-website"
           name="website"
           type="url"
-          label={copy.profile.websiteLabel}
+          label={copy.profile.websitePortfolioLabel}
           placeholder={copy.profile.phWebsite}
           value={value.website ?? ""}
           autoComplete="url"

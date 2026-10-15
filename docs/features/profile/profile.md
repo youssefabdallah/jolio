@@ -64,22 +64,45 @@ stored here — never to invented experience.
 - `INVALID_PROFILE_VALUE` (422) with `profile.errors.*` translation
   keys (EN + FR present).
 
-## Web wizard (`/profile`)
+## Web wizard (`/profile`, mirrors the Stitch "Profile Edit Wizard")
 
 - Seven steps with one icon each (user, article, sliders, briefcase,
   graduation cap, globe, check): contact, headline, skills,
   experience, education, languages, review. The editor reopens at the
   stored `current_step`; free jumping between steps unlocks at 100%
-  completion.
-- Save semantics: non-review steps show Next plus a plain Save that
-  persists the current slice, stays on the step, and is the only
-  action that shows the "Profile saved" banner. Advancing steps saves
-  silently with no banner. The review step alone shows
-  Save-and-go-to-dashboard, which validates the whole document and
-  routes to `/dashboard`.
-- Completion bar mirrors the server score; the step pills and the
-  step content animate (fade-and-rise), all disabled under
+  completion. One white card holds the step content plus the action
+  bar (Back / Save draft / Next; review swaps Next for teal
+  Save-and-go-to-dashboard but keeps Save draft). Back is always
+  rendered, disabled on step 1. The header carries Preview resume,
+  which saves the current slice and jumps to review.
+- Save semantics: Save draft persists the current slice, stays on the
+  step, and is the only action that shows the "Profile saved" banner.
+  Advancing steps saves silently with no banner. Finish (review)
+  validates the whole document and routes to `/dashboard`.
+- Progress bar mirrors **real completeness** (the weighted
+  `estimateCompletion` score, same as the server), not step position:
+  both the bar fill and the `(N%)` label show it, so navigating between
+  steps never moves it — it only changes when a field is filled or
+  missing. The `Step X of 7 • Title` caption still tracks position.
+  Step pills (done = teal
+  check) and step content animate (fade-and-rise), all disabled under
   `prefers-reduced-motion`.
+- Skills: toolbar (group + skill + proficiency + Add) above a static-look
+  table whose group/skill cells are borderless inline-edit inputs.
+  The toolbar Add is the only add affordance — a complete trio adds the
+  row immediately, an empty pair appends a blank row after validating
+  the open rows. The former bottom `+ Add skill` button is removed.
+  Experience/education entries are always-expanded cards (no
+  collapse); experience start/end dates are native `type="month"`
+  pickers (stored as `YYYY-MM`); bullets are a plain mono textarea
+  (`•` per line,
+  markers stripped on save). Languages are single-line rows (ISO
+  code + inline name + CEFR badge + level + remove). Entry cards and
+  language rows keep quiet × removes; education years stay selects
+  (1950..current+5 domain rule) where the mockup sketches text.
+- Counters: headline `n / 140 chars`, executive summary
+  `n / 2000 chars` (mirrors the shared `summary` max); the Add buttons
+  render a single leading plus icon.
 
 ## Skills taxonomy + shared Autocomplete
 

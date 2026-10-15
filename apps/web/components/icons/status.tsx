@@ -15,6 +15,25 @@ function base(size: number, className?: string) {
   };
 }
 
+export function CloseIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+/** Material `unfold_more`: opposing chevrons marking a droppable list. */
+export function UnfoldMoreIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="m7 9 5-5 5 5" />
+      <path d="m7 15 5 5 5-5" />
+    </svg>
+  );
+}
+
 export function ArticleIcon({ size = 18, className }: IconProps) {
   return (
     <svg {...base(size, className)}>

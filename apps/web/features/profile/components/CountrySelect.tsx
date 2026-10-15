@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { getCountries, type CountryCode } from "libphonenumber-js";
 import { copy } from "@/copy";
 import Autocomplete, { type AutocompleteOption } from "@/components/ui/inputs/Autocomplete";
+import { CloseIcon, UnfoldMoreIcon } from "@/components/icons";
 import { countryFlag, EXCLUDED_COUNTRY_CODES } from "./countryFlag";
 
 /**
@@ -44,6 +45,22 @@ export default function CountrySelect({
     []
   );
 
+  const codeForValue = useMemo(() => {
+    const needle = value.trim().toLowerCase();
+    if (needle === "") {
+      return null;
+    }
+    for (const option of options) {
+      if (
+        option.value.toLowerCase() === needle ||
+        option.keywords?.toLowerCase() === needle
+      ) {
+        return (option.keywords ?? null) as CountryCode | null;
+      }
+    }
+    return null;
+  }, [options, value]);
+
   return (
     <Autocomplete
       id="profile-country"
@@ -58,6 +75,25 @@ export default function CountrySelect({
       emptyText={copy.profile.autocompleteEmpty}
       invalidText={copy.profile.countryInvalid}
       allowCustom={false}
+      leading={codeForValue ? countryFlag(codeForValue) : undefined}
+      trailing={
+        <>
+          {value !== "" ? (
+            <button
+              type="button"
+              aria-label={copy.profile.clearCountry}
+              className="adorn-clear"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => onChange("")}
+            >
+              <CloseIcon size={14} />
+            </button>
+          ) : null}
+          <span aria-hidden="true" className="inline-flex">
+            <UnfoldMoreIcon size={16} />
+          </span>
+        </>
+      }
     />
   );
 }

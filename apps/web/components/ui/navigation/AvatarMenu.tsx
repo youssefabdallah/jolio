@@ -12,8 +12,19 @@ import { ChevronDownIcon } from "@/components/icons";
  * Grouped sections mirror the design; every destination without a page
  * renders disabled with its version/shortcut badge instead of a dead
  * link. Only Sign out acts — it revokes server-side first.
+ *
+ * `variant="folio"` swaps the trigger capsule for the folio editor's
+ * chrome (28px square avatar, normal-weight name); the menu itself is
+ * identical in both shells.
  */
-export default function AvatarMenu({ user }: { user: RegisteredUser }) {
+export default function AvatarMenu({
+  user,
+  variant = "default",
+}: {
+  user: RegisteredUser;
+  variant?: "default" | "folio";
+}) {
+  const folio = variant === "folio";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -57,13 +68,13 @@ export default function AvatarMenu({ user }: { user: RegisteredUser }) {
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        className="dash-avatar-trigger"
+        className={folio ? "folio-user" : "dash-avatar-trigger"}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={copy.dashboard.avatarMenuLabel}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="dash-avatar-btn" aria-hidden="true">
+        <span className={folio ? "folio-avatar" : "dash-avatar-btn"} aria-hidden="true">
           {user.avatar_url ? (
             /* eslint-disable-next-line @next/next/no-img-element -- remote provider URL unknown at build time; next/image optimization is not worth remotePatterns + external fetch for a 36px glyph */
             <img
@@ -71,14 +82,16 @@ export default function AvatarMenu({ user }: { user: RegisteredUser }) {
               alt=""
               referrerPolicy="no-referrer"
               draggable={false}
-              className="dash-avatar-img"
+              className="avatar-img"
             />
           ) : (
             user.display_name.slice(0, 1).toUpperCase()
           )}
         </span>
-        <span className="dash-avatar-name truncate">{user.display_name}</span>
-        <ChevronDownIcon size={16} className="shrink-0 text-muted" />
+        <span className={`${folio ? "folio-user-name" : "dash-avatar-name"} truncate`}>
+          {user.display_name}
+        </span>
+        <ChevronDownIcon size={16} className={folio ? "folio-user-caret" : "shrink-0 text-muted"} />
       </button>
 
       {open ? (

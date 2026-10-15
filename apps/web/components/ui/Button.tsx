@@ -4,6 +4,8 @@ export type ButtonVariant = "primary" | "secondary" | "destructive";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
+  /** Compact size for inline add-row actions (mock-style + Add buttons). */
+  size?: "md" | "sm";
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -14,11 +16,16 @@ const variantClasses: Record<ButtonVariant, string> = {
 
 export default function Button({
   variant = "primary",
+  size = "md",
   className = "",
   type = "button",
   ...rest
 }: ButtonProps) {
   return (
-    <button type={type} className={`${variantClasses[variant]} ${className}`} {...rest} />
+    <button
+      type={type}
+      className={`${variantClasses[variant]} ${size === "sm" ? "btn-sm" : ""} ${className}`}
+      {...rest}
+    />
   );
 }

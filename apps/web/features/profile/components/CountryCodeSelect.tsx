@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { getCountries, getCountryCallingCode, type CountryCode } from "libphonenumber-js";
 import { copy } from "@/copy";
 import Autocomplete, { type AutocompleteOption } from "@/components/ui/inputs/Autocomplete";
+import { ChevronDownIcon } from "@/components/icons";
 import { countryFlag, EXCLUDED_COUNTRY_CODES } from "./countryFlag";
 
 const COUNTRIES = getCountries() as CountryCode[];
@@ -70,10 +71,11 @@ export default function CountryCodeSelect({
       onChange={(next) => onChange(next as CountryCode)}
       emptyText={copy.profile.autocompleteEmpty}
       trigger={
-        <>
-          <span aria-hidden="true">{current ? countryFlag(current.code) : ""}</span>
-          <span>+{current?.calling ?? ""}</span>
-        </>
+        <span className="flex items-center gap-1" aria-hidden="true">
+          <span className="text-caption leading-none">{current ? countryFlag(current.code) : ""}</span>
+          <span className="text-caption leading-none">+{current?.calling ?? ""}</span>
+          <ChevronDownIcon size={14} className="text-muted" />
+        </span>
       }
       searchLabel={copy.profile.countrySearchLabel}
       searchPlaceholder={copy.profile.countrySearchPlaceholder}
