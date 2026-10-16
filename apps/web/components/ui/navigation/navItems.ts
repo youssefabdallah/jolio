@@ -31,7 +31,7 @@ export const workspaceNav: NavItem[] = [
   { key: "search", label: copy.dashboard.navSearch, icon: SearchIcon, soon: true },
   { key: "applications", label: copy.dashboard.navApplications, icon: ArticleIcon, soon: true },
   { key: "profile", label: copy.dashboard.navProfile, icon: UserIcon, href: "/profile" },
-  { key: "sources", label: copy.dashboard.navSources, icon: TuneIcon, soon: true },
+  { key: "sources", label: copy.dashboard.navSources, icon: TuneIcon, href: "/sources" },
 ];
 
 export const secondaryNav: NavItem[] = [

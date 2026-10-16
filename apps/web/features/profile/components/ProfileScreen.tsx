@@ -41,7 +41,7 @@ import {
   presentDateErrors,
 } from "./Sections";
 import StepIndicator, { type WizardStep } from "./StepIndicator";
-import ProfileShell from "./ProfileShell";
+import { DashboardShell } from "@/components/ui/layout";
 import { estimateCompletion } from "../completion";
 import { useRouter } from "next/navigation";
 
@@ -437,7 +437,7 @@ export default function ProfileScreen({
   }
 
   return (
-    <ProfileShell user={user} active="profile">
+    <DashboardShell user={user} active="profile">
       <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-rule">
         <div>
           <h1 className="text-h1 font-bold text-ink">{copy.profile.title}</h1>
@@ -803,7 +803,7 @@ export default function ProfileScreen({
         </div>
       </div>
       </div>
-    </ProfileShell>
+    </DashboardShell>
   );
 }
 

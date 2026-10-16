@@ -19,7 +19,9 @@ export interface FieldSpec {
 /** Resolve a spec message key (e.g. profile.validation.email_invalid) through copy.ts. */
 export function resolveMessage(key: string, vars: Record<string, string | number> = {}): string {
   const [namespace, group, ...rest] = key.split(".");
-  const tableName = namespace === "identity" ? "auth" : namespace;
+  // Backend context names differ from frontend features in two cases:
+  // identity ships as auth, config ships as sources.
+  const tableName = namespace === "identity" ? "auth" : namespace === "config" ? "sources" : namespace;
   const table = (copy as Record<string, Record<string, string>>)[tableName] ?? {};
   const camel = rest
     .join("_")
@@ -62,6 +64,11 @@ function scalarSchema(spec: FieldSpec): yup.Schema {
       number = number.integer(messageFor(spec, "integer", "Must be whole."));
     }
     schema = number;
+  } else if (rules.boolean === true) {
+    const checkbox = yup.boolean().typeError(messageFor(spec, "boolean", "Invalid value."));
+    return rules.required === true
+      ? checkbox.required(messageFor(spec, "required", "Required."))
+      : checkbox.optional().nullable();
   } else {
     schema = yup.string();
     // The backend trims every stored string (and rejects blank ones),

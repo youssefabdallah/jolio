@@ -38,6 +38,9 @@ export const MAX_AUTH_BODY_BYTES = 32 * 1024;
 /** Upper bound for profile documents (bounded sections, bullets). */
 export const MAX_PROFILE_BODY_BYTES = 512 * 1024;
 
+/** Upper bound for source documents (one short form, capped tags). */
+export const MAX_SOURCES_BODY_BYTES = 64 * 1024;
+
 /** Upper bound for a single opaque token string. */
 export const MAX_TOKEN_CHARS = 8 * 1024;
 

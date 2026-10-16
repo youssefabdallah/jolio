@@ -116,3 +116,34 @@ export function ArchiveIcon({ size = 18, className }: IconProps) {
     </svg>
   );
 }
+
+/** Trash bin for destructive drawer actions (Sources editor). */
+export function DeleteIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M4 7h16M10 4h4M6 7l1 14h10l1-14" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
+/** Warning triangle for invalid field states (Sources editor). */
+export function WarningIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M12 3 2 21h20L12 3z" />
+      <path d="M12 10v5M12 18.5v.5" />
+    </svg>
+  );
+}
+
+/** Horizontal ellipsis for row action menus. */
+export function MoreIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="5" cy="12" r="1.6" />
+      <circle cx="12" cy="12" r="1.6" />
+      <circle cx="19" cy="12" r="1.6" />
+    </svg>
+  );
+}

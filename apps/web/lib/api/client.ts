@@ -96,8 +96,7 @@ export async function postJson<T>(
 /**
  * GET JSON from a same-origin proxy route, resolving `data` or throwing
  * a typed ApiError. Reads retry once: they are idempotent.
- */
-export async function getJson<T>(path: string, retries = 1): Promise<T> {
+ */export async function getJson<T>(path: string, retries = 1): Promise<T> {
   let response: Response;
   try {
     response = await fetch(path, { headers: { Accept: "application/json" }, signal: clientSignal() });
@@ -122,6 +121,68 @@ export async function getJson<T>(path: string, retries = 1): Promise<T> {
   }
 
   return body.data as T;
+}
+
+/** Paginator metadata travelling beside `data` in list responses. */
+export interface PageMeta {
+  current_page: number;
+  from: number | null;
+  last_page: number;
+  per_page: number;
+  to: number | null;
+  total: number;
+}
+
+/**
+ * GET a paginated list, resolving rows plus the paginator meta.
+ * Same retry contract as getJson (idempotent reads).
+ */
+export async function getPaginated<T>(path: string, retries = 1): Promise<{ items: T[]; meta: PageMeta }> {
+  let response: Response;
+  try {
+    response = await fetch(path, { headers: { Accept: "application/json" }, signal: clientSignal() });
+  } catch {
+    if (retries > 0) {
+      await sleep(RETRY_DELAY_MS);
+      return getPaginated<T>(path, retries - 1);
+    }
+    throw new ApiError(0, { code: "UPSTREAM_UNREACHABLE", message: copy.common.failedConnection });
+  }
+
+  const body = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    if (response.status === 502 && retries > 0) {
+      await sleep(RETRY_DELAY_MS);
+      return getPaginated<T>(path, retries - 1);
+    }
+    const error: ApiErrorBody =
+      body?.error ?? { code: "UNKNOWN", message: copy.common.unexpectedError };
+    throw new ApiError(response.status, error);
+  }
+
+  return { items: (body?.data ?? []) as T[], meta: body?.meta as PageMeta };
+}
+
+/**
+ * DELETE, resolving void on 2xx or throwing ApiError. No automatic
+ * retry: a retried delete answers 404 for a row that is already gone,
+ * which would surface a false failure for a success.
+ */
+export async function deleteVoid(path: string): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(path, { method: "DELETE", signal: clientSignal() });
+  } catch {
+    throw new ApiError(0, { code: "UPSTREAM_UNREACHABLE", message: copy.common.failedConnection });
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    const error: ApiErrorBody =
+      body?.error ?? { code: "UNKNOWN", message: copy.common.unexpectedError };
+    throw new ApiError(response.status, error);
+  }
 }
 
 /**

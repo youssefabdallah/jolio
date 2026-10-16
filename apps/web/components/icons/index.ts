@@ -21,10 +21,13 @@ export {
   CheckCircleIcon,
   ChevronDownIcon,
   CloseIcon,
+  DeleteIcon,
   HelpIcon,
+  MoreIcon,
   RefreshIcon,
   TerminalIcon,
   TuneIcon,
   UnfoldMoreIcon,
+  WarningIcon,
 } from "./status";
 export type { IconProps } from "./types";

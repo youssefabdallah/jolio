@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as yup from "yup";
 import { loginSchema, registerSchema } from "./auth";
 import { profileSchema } from "./profile";
+import { sourceSchema } from "./sources";
 import { splitBlockText } from "../../features/profile/components/RichBullets";
 describe("bullet text splitting (rich editor boundary)", () => {
   it("splits lines and drops blanks", () => {
@@ -204,5 +205,35 @@ describe("live completion estimator (mirrors ProfileCompletion)", () => {
     expect(completionTone(69)).toBe("orange");
     expect(estimateCompletion(full)).toBe(100);
     expect(completionTone(100)).toBe("green");
+  });
+});
+
+describe("sources schema (mirrors shared/validation/sources.json)", () => {
+  const valid = {
+    name: "Arbeitnow",
+    url: "https://www.arbeitnow.com/api/job-board-api",
+    type: "search_engine",
+    priority: "T2",
+    country_code: "DE",
+    is_enabled: true,
+  };
+
+  it("accepts a complete document", async () => {
+    expect(await sourceSchema().validate(valid)).toMatchObject({ name: "Arbeitnow" });
+  });
+
+  it("rejects with the backend-identical messages", async () => {
+    expect(
+      await messages(sourceSchema(), {
+        ...valid,
+        name: "",
+        type: "scraper",
+        is_enabled: "yes",
+      })
+    ).toEqual([
+      "is_enabled: The enabled flag must be true or false.",
+      "name: Please name the source.",
+      "type: Pick a listed source type.",
+    ]);
   });
 });

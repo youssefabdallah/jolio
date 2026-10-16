@@ -10,3 +10,5 @@ export { default as TextInput } from "./TextInput";
 export type { TextInputProps } from "./TextInput";
 export { default as Autocomplete } from "./inputs/Autocomplete";
 export type { AutocompleteOption } from "./inputs/Autocomplete";
+export { default as Modal } from "./dialogs/Modal";
+export type { ModalProps } from "./dialogs/Modal";
