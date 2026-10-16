@@ -23,6 +23,9 @@ enum ErrorCode: string
     case OauthNotConfigured = 'OAUTH_NOT_CONFIGURED';
     case OauthFailed = 'OAUTH_FAILED';
     case InvalidProfileValue = 'INVALID_PROFILE_VALUE';
+    case InvalidSourceValue = 'INVALID_SOURCE_VALUE';
+    case SourceTaken = 'SOURCE_TAKEN';
+    case SourceNotFound = 'SOURCE_NOT_FOUND';
 
     /**
      * HTTP status for the central API exception renderer.
@@ -31,6 +34,8 @@ enum ErrorCode: string
     {
         return match ($this) {
             self::EmailTaken => 409,
+            self::SourceTaken => 409,
+            self::SourceNotFound => 404,
             self::InvalidCredentials => 401,
             self::OauthNotConfigured => 503,
             self::OauthFailed => 502,

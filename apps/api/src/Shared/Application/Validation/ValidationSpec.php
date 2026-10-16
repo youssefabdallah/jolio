@@ -133,7 +133,7 @@ final class ValidationSpec
             $out[] = match ($rule) {
                 'required' => $value ? 'required' : 'nullable',
                 'nullable' => $value ? 'nullable' : null,
-                'string', 'integer', 'array', 'url', 'confirmed' => $rule,
+                'string', 'integer', 'array', 'boolean', 'url', 'confirmed' => $rule,
                 'email' => $value === true ? 'email' : "email:{$value}",
                 // E.164 shape (the SPA additionally proves the number is
                 // really diallable with libphonenumber-js).

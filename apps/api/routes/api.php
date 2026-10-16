@@ -1,6 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Src\Config\Presentation\Http\Controllers\DeleteSourceController;
+use Src\Config\Presentation\Http\Controllers\ListSourcesController;
+use Src\Config\Presentation\Http\Controllers\ShowSourceController;
+use Src\Config\Presentation\Http\Controllers\StoreSourceController;
+use Src\Config\Presentation\Http\Controllers\UpdateSourceController;
 use Src\Identity\Presentation\Http\Controllers\LoginController;
 use Src\Identity\Presentation\Http\Controllers\LogoutController;
 use Src\Identity\Presentation\Http\Controllers\MeController;
@@ -19,6 +24,14 @@ Route::get('/profile', ShowProfileController::class)
 Route::put('/profile', UpdateProfileController::class)
     ->middleware(['auth:sanctum', 'throttle:60,1'])
     ->name('profile.update');
+
+Route::prefix('v1/sources')->middleware(['auth:sanctum', 'throttle:60,1'])->group(function (): void {
+    Route::get('/', ListSourcesController::class)->name('sources.index');
+    Route::post('/', StoreSourceController::class)->name('sources.store');
+    Route::get('/{source}', ShowSourceController::class)->name('sources.show');
+    Route::put('/{source}', UpdateSourceController::class)->name('sources.update');
+    Route::delete('/{source}', DeleteSourceController::class)->name('sources.destroy');
+});
 
 Route::prefix('v1/auth')->middleware('throttle:60,1,auth-v1')->group(function (): void {
     Route::post('/register', RegisterController::class)

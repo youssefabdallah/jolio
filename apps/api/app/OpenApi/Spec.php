@@ -109,3 +109,62 @@ final class ProfileResponse
 {
     private function __construct() {}
 }
+
+#[OA\Schema(
+    schema: 'SourceObject',
+    required: ['id', 'name', 'url', 'type', 'priority', 'country_code', 'is_enabled'],
+    properties: [
+        new OA\Property(property: 'id', type: 'string', example: '01JABCD1234EFGH5678JKLMNP'),
+        new OA\Property(property: 'name', type: 'string', example: 'Arbeitnow'),
+        new OA\Property(property: 'url', type: 'string', format: 'uri', example: 'https://www.arbeitnow.com/api/job-board-api'),
+        new OA\Property(property: 'type', type: 'string', enum: ['search_engine', 'board', 'ats', 'career_page'], example: 'search_engine'),
+        new OA\Property(property: 'priority', type: 'string', enum: ['T1', 'T2', 'T3'], example: 'T2'),
+        new OA\Property(property: 'country_code', type: 'string', example: 'GLOBAL'),
+        new OA\Property(property: 'is_enabled', type: 'boolean', example: true),
+    ],
+)]
+/**
+ * Bare job-source registry entry shape.
+ */
+final class SourceObject
+{
+    private function __construct() {}
+}
+
+#[OA\Schema(
+    schema: 'SourceResponse',
+    required: ['data'],
+    properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'object',
+            required: ['source'],
+            properties: [
+                new OA\Property(property: 'source', ref: '#/components/schemas/SourceObject'),
+            ],
+        ),
+    ],
+)]
+/**
+ * Single job-source registry entry returned by the Sources endpoints.
+ */
+final class SourceResponse
+{
+    private function __construct() {}
+}
+
+#[OA\Schema(
+    schema: 'SourceListResponse',
+    required: ['data'],
+    properties: [
+        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/SourceObject')),
+    ],
+)]
+/**
+ * Paginated registry returned by GET /api/v1/sources (standard
+ * paginator envelope with links and meta alongside data).
+ */
+final class SourceListResponse
+{
+    private function __construct() {}
+}

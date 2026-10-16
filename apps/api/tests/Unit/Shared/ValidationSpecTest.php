@@ -55,4 +55,22 @@ final class ValidationSpecTest extends TestCase
     {
         $this->assertSame([], ValidationSpec::section('nope', 'nope')['rules']);
     }
+
+    public function test_builds_source_rules_with_shared_dsl_types(): void
+    {
+        $source = ValidationSpec::section('sources', 'source');
+
+        $this->assertSame(
+            ['name', 'url', 'type', 'priority', 'country_code', 'is_enabled'],
+            array_keys($source['rules'])
+        );
+        $this->assertContains('max:120', $source['rules']['name']);
+        $this->assertContains('url', $source['rules']['url']);
+        $this->assertContains('in:search_engine,board,ats,career_page', $source['rules']['type']);
+        $this->assertContains('in:T1,T2,T3', $source['rules']['priority']);
+        $this->assertContains('boolean', $source['rules']['is_enabled']);
+        $this->assertContains('required', $source['rules']['is_enabled']);
+        $this->assertSame('config.validation.type_in', $source['messageKeys']['type.in']);
+        $this->assertSame('config.validation.enabled_boolean', $source['messageKeys']['is_enabled.boolean']);
+    }
 }

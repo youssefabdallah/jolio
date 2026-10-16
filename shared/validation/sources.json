@@ -1,0 +1,59 @@
+{
+  "$schema": "https://jolio.dev/schemas/validation/v1",
+  "context": "sources",
+  "notes": "Single source of truth for job-source registry input validation (SPECS FR-38/FR-39, US-302). The PHP loader builds Laravel rules; the TS builder builds yup schemas. Shape-only rules live here; DB uniqueness (per-user name/url) is enforced by the application handlers plus unique indexes. Regex-shape rules the DSL cannot express (https-only URL, country shape) are merged in the FormRequests as documented exceptions and re-enforced by the Domain value objects. Message values are translation keys resolved per side (lang/*.php, copy.ts).",
+  "sections": {
+    "source": {
+      "name": {
+        "rules": { "required": true, "string": true, "max": 120 },
+        "messages": {
+          "required": "config.validation.name_required",
+          "max": "config.validation.name_max"
+        }
+      },      "url": {
+        "rules": { "required": true, "string": true, "url": true, "max": 2048 },
+        "messages": {
+          "required": "config.validation.url_required",
+          "url": "config.validation.url_invalid",
+          "max": "config.validation.url_max"
+        }
+      },
+      "type": {
+        "rules": {
+          "required": true,
+          "string": true,
+          "in": ["search_engine", "board", "ats", "career_page"]
+        },
+        "messages": {
+          "required": "config.validation.type_required",
+          "in": "config.validation.type_in"
+        }
+      },
+      "priority": {
+        "rules": {
+          "required": true,
+          "string": true,
+          "in": ["T1", "T2", "T3"]
+        },
+        "messages": {
+          "required": "config.validation.priority_required",
+          "in": "config.validation.priority_in"
+        }
+      },
+      "country_code": {
+        "rules": { "required": true, "string": true, "max": 8 },
+        "messages": {
+          "required": "config.validation.country_required",
+          "max": "config.validation.country_max"
+        }
+      },
+      "is_enabled": {
+        "rules": { "required": true, "boolean": true },
+        "messages": {
+          "required": "config.validation.enabled_required",
+          "boolean": "config.validation.enabled_boolean"
+        }
+      }
+    }
+  }
+}
