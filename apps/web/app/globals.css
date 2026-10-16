@@ -976,6 +976,11 @@
     @apply absolute right-0 top-full mt-1 z-30 min-w-36
       bg-card border border-rule rounded-control shadow-2xl py-1;
   }
+  /* Floating variant: portalled to the body so table overflow
+     clipping never cuts it off; anchored by trigger coordinates. */
+  .src-menu-floating {
+    @apply fixed right-auto top-auto mt-0 z-50;
+  }
   .src-menu-item {
     @apply w-full flex items-center gap-2 px-3 py-2
       text-caption text-ink hover:bg-paper
